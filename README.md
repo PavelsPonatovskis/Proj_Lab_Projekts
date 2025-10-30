@@ -1,5 +1,15 @@
 # Preču piegādes maršrutēšana 
 
+## Problēmas nostādne
+
+Mūsdienās preču piegādes procesu efektivitāte ir viens no galvenajiem faktoriem, kas ietekmē uzņēmuma konkurētspēju un klientu apmierinātību. Pieaugot e-komercijas apjomiem, arvien nozīmīgāka kļūst optimāla maršrutu plānošana, kas ļauj samazināt piegādes laiku, degvielas patēriņu un izmaksas. 
+Maršrutu plānošana bieži ir sarežģīts uzdevums, kas prasa ņemt vērā daudzas mainīgās – transportlīdzekļu kapacitāti, klientu atrašanās vietas, piegādes laikus un citus ierobežojumus. Bez automatizētiem rīkiem šādu problēmu risināšana ir laikietilpīga un var radīt neefektīvus rezultātus.
+
+## Darba un novērtēšanas mērķis
+
+Darba mērķis ir izstrādāt programmatūras risinājumu, kas nodrošina preču piegādes maršrutu optimizāciju, ņemot vērā dažādus ierobežojumus, piemēram, attālumus, transportlīdzekļu kapacitāti un piegādes laika logus. Projekta ietvaros tiks izveidots algoritmisks modelis, kas spēj ģenerēt efektīvākus maršrutus, samazinot piegādes izmaksas un laiku.
+Novērtēšanas mērķis ir pārbaudīt izstrādātā risinājuma efektivitāti, salīdzinot to ar esošiem maršrutēšanas rīkiem vai piemērojot testdatus, lai analizētu rezultātu kvalitāti un aprēķina precizitāti.
+
 ## Līdzīgo risinājumu pārskats 
 
 | **Serviss** | **Apraksts un novērtējums** |
@@ -66,5 +76,15 @@ Piegāde "1" --> "1" Maršruts : izmanto
 Kurjers "1" --> "1..*" Piegāde : izpilda
 
 @enduml
+```
+## Tehnoloģiju steks
 
-
+| Slānis | Tehnoloģija | Apraksts |
+|--------|--------------|-----------|
+| Frontend | React.js | Lietotāja saskarnes izstrādei – nodrošina interaktīvu un dinamisku tīmekļa vidi, kur lietotājs var apskatīt un pārvaldīt pasūtījumus un maršrutus. |
+| Backend | Flask | Servera loģikas īstenošanai – apstrādā lietotāja pieprasījumus, veic datu apstrādi un savienojumu ar datubāzi. |
+| Datubāze | SQLite | Datu glabāšanai – saglabā informāciju par klientiem, pasūtījumiem, piegādēm un maršrutiem datubāzē. |
+| Izstrādes vide | Visual Studio Code | Galvenā izstrādes vide projekta programmēšanai, testēšanai un kļūdu labošanai. |
+| Servera izvietošana | Microsoft Azure | Projekta izvietošanai mākoņvidē – ļauj darbināt Flask serveri un React lietotni tiešsaistē, nodrošinot piekļuvi no jebkuras vietas. |
+| Kartes un maršruti | OpenStreetMap, OSRM | Maršrutu aprēķinam un ģeogrāfisko datu attēlošanai, izmantojot atvērtā koda kartogrāfisko datu avotu. | 
+| Datu vizualizācija | Chart.js | Grafiku un diagrammu veidošanai – ļauj attēlot maršrutu statistiku, piegādes laikus un citu analītisku informāciju lietotāja saskarnē. |
