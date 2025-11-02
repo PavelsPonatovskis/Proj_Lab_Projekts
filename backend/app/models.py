@@ -1,0 +1,63 @@
+from datetime import datetime
+from werkzeug.security import generate_password_hash, check_password_hash
+from . import db
+
+class User(db.Model):
+    __tablename__ = "users"
+    id = db.Column(db.Integer, primary_key=True)
+    email = db.Column(db.String(255), unique=True, nullable=False, index=True)
+    password_hash = db.Column(db.String(255), nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    routes = db.relationship("Route", backref="owner", lazy=True)
+
+    def set_password(self, raw_password: str):
+        self.password_hash = generate_password_hash(raw_password)
+
+    def check_password(self, raw_password: str) -> bool:
+        return check_password_hash(self.password_hash, raw_password)
+
+
+class Route(db.Model):
+    __tablename__ = "routes"
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(255), nullable=False)
+    parameters = db.Column(db.JSON, nullable=True)  
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
+
+    clients = db.relationship("Client", backref="route", cascade="all, delete-orphan", lazy=True)
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "name": self.name,
+            "parameters": self.parameters,
+            "created_at": self.created_at.isoformat(),
+            "clients": [c.to_dict() for c in self.clients],
+        }
+
+
+class Client(db.Model):
+    __tablename__ = "clients"
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(255), nullable=False)
+    lat = db.Column(db.Float, nullable=False)
+    lon = db.Column(db.Float, nullable=False)
+    time_window_from = db.Column(db.String(16), nullable=True)
+    time_window_to = db.Column(db.String(16), nullable=True)
+    demand = db.Column(db.Float, nullable=True)
+
+    route_id = db.Column(db.Integer, db.ForeignKey("routes.id"), nullable=False)
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "name": self.name,
+            "lat": self.lat,
+            "lon": self.lon,
+            "time_window_from": self.time_window_from,
+            "time_window_to": self.time_window_to,
+            "demand": self.demand,
+        }
