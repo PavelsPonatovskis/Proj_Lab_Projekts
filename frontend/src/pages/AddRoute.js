@@ -1,179 +1,422 @@
-import React, { useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import "./Dashboard.css";
+import "./AddRoute.css";
+import { MapContainer, TileLayer, Marker, Tooltip, useMapEvents } from "react-leaflet";
+import L from "leaflet";
+import markerIcon2x from "leaflet/dist/images/marker-icon-2x.png";
+import markerIcon from "leaflet/dist/images/marker-icon.png";
+import markerShadow from "leaflet/dist/images/marker-shadow.png";
+import { fetchWarehouses } from "../api/warehousesApi";
+
+// Fix Leaflet default icon paths (blue markers)
+delete L.Icon.Default.prototype._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: markerIcon2x,
+  iconUrl: markerIcon,
+  shadowUrl: markerShadow,
+});
+
+/** ✅ Red marker icon for warehouses */
+const warehouseIcon = new L.Icon({
+  iconUrl:
+    "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png",
+  shadowUrl: markerShadow,
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+  popupAnchor: [1, -34],
+  shadowSize: [41, 41],
+});
+
+/** Handles clicking on map: sets coords for the currently active stop */
+function MapClickHandler({ activeStopId, setStops }) {
+  useMapEvents({
+    click(e) {
+      const { lat, lng } = e.latlng;
+      setStops((prev) =>
+        prev.map((stop) =>
+          stop.id === activeStopId
+            ? { ...stop, lat: lat.toFixed(6), lng: lng.toFixed(6) }
+            : stop
+        )
+      );
+    },
+  });
+
+  return null;
+}
 
 function AddRoute() {
-  const [name, setName] = useState("");
-  const [couriers, setCouriers] = useState(1);
-  const [distance, setDistance] = useState(""); 
-  const [message, setMessage] = useState("");
   const navigate = useNavigate();
+  const userName = localStorage.getItem("userName") || "user";
+
+  const [routeName, setRouteName] = useState("");
+  const [stops, setStops] = useState([{ id: 1, label: "", lat: "", lng: "" }]);
+  const [activeStopId, setActiveStopId] = useState(1);
+
+  const [warehouses, setWarehouses] = useState([]);
+  const [whError, setWhError] = useState("");
+
+  // ✅ pick warehouse #1 (or first) as the “fixed” warehouse for now
+  const selectedWarehouse = useMemo(() => {
+    if (!warehouses || warehouses.length === 0) return null;
+    return warehouses.find((w) => w.id === 1) || warehouses[0];
+  }, [warehouses]);
+
+  // ✅ load warehouses once
+  useEffect(() => {
+    let alive = true;
+
+    async function loadWarehouses() {
+      setWhError("");
+      try {
+        const list = await fetchWarehouses();
+        if (!alive) return;
+        setWarehouses(list || []);
+      } catch (e) {
+        console.error("Failed to load warehouses:", e);
+        if (!alive) return;
+        setWhError(e?.message || "Failed to load warehouses.");
+      }
+    }
+
+    loadWarehouses();
+    return () => {
+      alive = false;
+    };
+  }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("userName");
+    navigate("/");
+  };
+
+  const handleAddStop = () => {
+    const newId = Date.now();
+    setStops((prev) => [...prev, { id: newId, label: "", lat: "", lng: "" }]);
+    setActiveStopId(newId);
+  };
+
+  const handleRemoveStop = (id) => {
+    setStops((prev) => {
+      const next = prev.filter((s) => s.id !== id);
+      if (activeStopId === id && next.length > 0) setActiveStopId(next[0].id);
+      return next.length > 0 ? next : [{ id: Date.now(), label: "", lat: "", lng: "" }];
+    });
+  };
+
+  const handleStopChange = (id, field, value) => {
+    setStops((prev) =>
+      prev.map((stop) => (stop.id === id ? { ...stop, [field]: value } : stop))
+    );
+  };
+
+  const cleanedStops = useMemo(() => {
+    return stops.filter(
+      (s) =>
+        s.lat.toString().trim() !== "" &&
+        s.lng.toString().trim() !== "" &&
+        !isNaN(Number(s.lat)) &&
+        !isNaN(Number(s.lng))
+    );
+  }, [stops]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const token = localStorage.getItem("token");
-    if (!token) {
-      setMessage("⚠️ You must be logged in!");
+    if (!routeName.trim()) {
+      alert("Please enter a route name.");
       return;
     }
 
-    const data = {
-      name,
-      parameters: { couriers, distance }, 
-      clients: [],
-    };
+    if (cleanedStops.length < 1) {
+      alert("Please add at least one stop with coordinates.");
+      return;
+    }
+
+    const token = localStorage.getItem("token");
+    if (!token) {
+      alert("You must be logged in to save a route.");
+      return;
+    }
+
+    if (!selectedWarehouse) {
+      alert("Warehouses are not loaded yet. Please try again.");
+      return;
+    }
 
     try {
-      const response = await fetch("http://127.0.0.1:5000/api/routes/", {
+      // 1) Create route + store chosen warehouse in parameters
+      const createResp = await fetch("http://127.0.0.1:5000/api/routes/", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(data),
+        body: JSON.stringify({
+          name: routeName.trim(),
+          parameters: {
+            couriers: 1,
+            warehouse: {
+              id: selectedWarehouse.id,
+              name: selectedWarehouse.name,
+              lat: selectedWarehouse.lat,
+              lon: selectedWarehouse.lng,
+            },
+          },
+        }),
       });
 
-      if (response.ok) {
-        setMessage("✅ Route added successfully!");
-        setTimeout(() => navigate("/routes"), 1000);
-      } else {
-        const err = await response.json();
-        setMessage(`❌ Error: ${err.error || JSON.stringify(err)}`);
+      const debugText = await createResp.text();
+      console.log("Create route response:", createResp.status, debugText);
+
+      if (!createResp.ok) {
+        alert("Failed to create route on the server.");
+        return;
       }
+
+      let routeId = null;
+      if (debugText && debugText.trim() !== "") {
+        try {
+          const created = JSON.parse(debugText);
+          routeId = created.id || created.item?.id || null;
+        } catch (jsonErr) {
+          console.warn("Create route response is not valid JSON:", jsonErr);
+        }
+      }
+
+      // Fallback: fetch list, pick newest with this name
+      if (!routeId) {
+        const listResp = await fetch("http://127.0.0.1:5000/api/routes/", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        if (listResp.ok) {
+          const listData = await listResp.json();
+          const items = listData.items || [];
+          const matching = items
+            .filter((r) => r.name === routeName.trim())
+            .sort((a, b) => (b.id || 0) - (a.id || 0));
+
+          if (matching.length > 0) routeId = matching[0].id;
+        }
+      }
+
+      if (!routeId) {
+        alert("Route was created, but we couldn't determine its ID to add stops.");
+        return;
+      }
+
+      // 2) Add stops as clients
+      for (let i = 0; i < cleanedStops.length; i++) {
+        const stop = cleanedStops[i];
+
+        const clientPayload = {
+          name: stop.label?.trim() || `Stop ${i + 1}`,
+          lat: Number(stop.lat),
+          lon: Number(stop.lng),
+        };
+
+        const clientResp = await fetch(
+          `http://127.0.0.1:5000/api/routes/${routeId}/clients`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify(clientPayload),
+          }
+        );
+
+        if (!clientResp.ok) {
+          console.error("Failed to add client", i + 1, clientResp.status);
+          alert("Route saved but one of the stops failed to be added.");
+        }
+      }
+
+      alert("✅ Route saved!");
+
+      setRouteName("");
+      setStops([{ id: Date.now(), label: "", lat: "", lng: "" }]);
+      setActiveStopId(1);
     } catch (err) {
-      console.error(err);
-      setMessage("⚠️ Server connection error");
+      console.error("Unexpected error while saving the route:", err);
+      alert("❌ Error while saving the route: " + (err.message || "see console"));
     }
   };
 
+  // ✅ Map center: warehouse if loaded, otherwise fallback to Riga-ish
+  const mapCenter = selectedWarehouse
+    ? [selectedWarehouse.lat, selectedWarehouse.lng]
+    : [56.9496, 24.1052];
+
   return (
-    <div style={styles.container}>
-      <div style={styles.card}>
-        <h2 style={styles.title}>📦 Pievienot maršrutu</h2>
-        <p>Ievadiet informāciju, lai pievienotu jaunu maršrutu.</p>
-
-        <form onSubmit={handleSubmit} style={styles.form}>
-          <div style={styles.field}>
-            <label style={styles.label}>Nosaukums:</label>
-            <input
-              type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="Piemēram: Rīgas piegādes"
-              required
-              style={styles.input}
-            />
-          </div>
-
-          <div style={styles.field}>
-            <label style={styles.label}>Kurjeru skaits:</label>
-            <input
-              type="number"
-              value={couriers}
-              min="1"
-              onChange={(e) => setCouriers(Number(e.target.value))}
-              style={styles.input}
-            />
-          </div>
-
-          {/* 👇 New distance field */}
-          <div style={styles.field}>
-            <label style={styles.label}>Attālums (km):</label>
-            <input
-              type="number"
-              step="0.1"
-              value={distance}
-              onChange={(e) => setDistance(e.target.value)}
-              placeholder="Piemēram: 12.5"
-              style={styles.input}
-            />
-          </div>
-
-          <button type="submit" style={styles.button}>
-            ➕ Pievienot
+    <div className="dashboard-page">
+      {/* TOP NAV */}
+      <header className="dashboard-nav">
+        <div className="nav-left">
+          <span className="nav-logo" onClick={() => navigate("/dashboard")}>
+            QuickRoute
+          </span>
+        </div>
+        <div className="nav-right">
+          <span className="nav-username">{userName}</span>
+          <button className="nav-logout-button" onClick={handleLogout}>
+            Log Out
           </button>
-        </form>
+        </div>
+      </header>
 
-        {message && <p style={styles.message}>{message}</p>}
+      {/* MAIN CONTENT */}
+      <main className="dashboard-main">
+        <div className="dashboard-card add-route-card">
+          <div className="dashboard-header">
+            <span className="dashboard-emoji">🧭</span>
+            <h1 className="dashboard-title">Create new route</h1>
+          </div>
+          <p className="dashboard-subtitle">
+            Specify the route name and add stops using coordinates or by selecting them on the map.
+          </p>
 
-        <button onClick={() => navigate("/dashboard")} style={styles.back}>
-          ⬅️ Atpakaļ uz paneli
-        </button>
-      </div>
+          <div className="add-route-layout">
+            {/* LEFT SIDE – FORM */}
+            <form className="add-route-form" onSubmit={handleSubmit}>
+              <div className="form-group">
+                <label>Route name</label>
+                <input
+                  type="text"
+                  placeholder="E.g. Riga deliveries"
+                  value={routeName}
+                  onChange={(e) => setRouteName(e.target.value)}
+                />
+              </div>
+
+              <div className="form-group">
+                <div className="stops-header">
+                  <label>Stops</label>
+                  <button type="button" className="small-button" onClick={handleAddStop}>
+                    + Add stop
+                  </button>
+                </div>
+
+                <p className="stops-help">
+                  Warehouses are shown as red markers. Stops are blue. Click a stop and then click
+                  on the map to set its coordinates.
+                </p>
+
+                <div className="stops-list">
+                  {stops.map((stop, index) => (
+                    <div
+                      key={stop.id}
+                      className={`stop-row ${activeStopId === stop.id ? "stop-row-active" : ""}`}
+                      onClick={() => setActiveStopId(stop.id)}
+                    >
+                      <div className="stop-row-top">
+                        <span className="stop-index">#{index + 1}</span>
+                        {stops.length > 1 && (
+                          <button
+                            type="button"
+                            className="link-button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleRemoveStop(stop.id);
+                            }}
+                          >
+                            Remove
+                          </button>
+                        )}
+                      </div>
+
+                      <input
+                        className="stop-label-input"
+                        type="text"
+                        placeholder="Label (optional)"
+                        value={stop.label}
+                        onChange={(e) => handleStopChange(stop.id, "label", e.target.value)}
+                      />
+
+                      <div className="coords-row">
+                        <input
+                          type="text"
+                          placeholder="Latitude (lat)"
+                          value={stop.lat}
+                          onChange={(e) => handleStopChange(stop.id, "lat", e.target.value)}
+                        />
+                        <input
+                          type="text"
+                          placeholder="Longitude (lng)"
+                          value={stop.lng}
+                          onChange={(e) => handleStopChange(stop.id, "lng", e.target.value)}
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <button type="submit" className="dashboard-button submit-route">
+                💾 Save route
+              </button>
+
+              <button
+                type="button"
+                className="dashboard-logout back-button"
+                onClick={() => navigate("/dashboard")}
+              >
+                Back to dashboard
+              </button>
+            </form>
+
+            {/* RIGHT SIDE – MAP */}
+            <div className="add-route-map-wrapper">
+              <h2 className="map-title">Map</h2>
+              <p className="map-help">
+                Warehouses are red. Stops are blue. Select a stop on the left, then click the map.
+              </p>
+
+              {whError && (
+                <div style={{ marginBottom: 10, padding: 10, borderRadius: 10, background: "#ffe8e8" }}>
+                  <strong>Warehouse load error:</strong> {whError}
+                </div>
+              )}
+
+              <MapContainer
+                center={mapCenter}
+                zoom={11}
+                scrollWheelZoom={true}
+                className="add-route-map"
+              >
+                <TileLayer
+                  attribution="&copy; OpenStreetMap contributors"
+                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                />
+
+                <MapClickHandler activeStopId={activeStopId} setStops={setStops} />
+
+                {/* ✅ ALL warehouses markers */}
+                {warehouses.map((w) => (
+                  <Marker key={w.id} position={[w.lat, w.lng]} icon={warehouseIcon}>
+                    <Tooltip direction="top" offset={[0, -10]} permanent={false}>
+                      {w.name}
+                    </Tooltip>
+                  </Marker>
+                ))}
+
+                {/* ✅ Stop markers */}
+                {stops
+                  .filter((s) => s.lat && s.lng && !isNaN(Number(s.lat)) && !isNaN(Number(s.lng)))
+                  .map((s) => (
+                    <Marker key={s.id} position={[parseFloat(s.lat), parseFloat(s.lng)]} />
+                  ))}
+              </MapContainer>
+            </div>
+          </div>
+        </div>
+      </main>
     </div>
   );
 }
-
-const styles = {
-  container: {
-    backgroundColor: "#f6f8fa",
-    height: "100vh",
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-    fontFamily: "Arial, sans-serif",
-  },
-  card: {
-    backgroundColor: "white",
-    padding: "40px",
-    borderRadius: "12px",
-    boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
-    width: "450px",
-    textAlign: "center",
-  },
-  title: {
-    marginBottom: "20px",
-    color: "#333",
-  },
-  form: {
-    display: "flex",
-    flexDirection: "column",
-    gap: "15px",
-    marginTop: "20px",
-    marginBottom: "20px",
-  },
-  field: {
-    textAlign: "left",
-  },
-  label: {
-    display: "block",
-    marginBottom: "5px",
-    fontWeight: "bold",
-    color: "#333",
-  },
-  input: {
-    width: "100%",
-    padding: "10px",
-    border: "1px solid #ccc",
-    borderRadius: "6px",
-    fontSize: "15px",
-  },
-  button: {
-    width: "100%",
-    padding: "12px",
-    backgroundColor: "#007bff",
-    color: "white",
-    border: "none",
-    borderRadius: "6px",
-    fontSize: "16px",
-    cursor: "pointer",
-  },
-  back: {
-    marginTop: "10px",
-    padding: "10px",
-    backgroundColor: "#e3e6ed",
-    color: "#333",
-    border: "none",
-    borderRadius: "6px",
-    fontSize: "15px",
-    cursor: "pointer",
-    width: "100%",
-  },
-  message: {
-    marginTop: "10px",
-    fontWeight: "bold",
-    color: "#333",
-  },
-};
 
 export default AddRoute;

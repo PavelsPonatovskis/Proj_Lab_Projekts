@@ -1,87 +1,106 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import "./Dashboard.css";
+import WeatherWidget from "../components/WeatherWidget";
+
+// Small list of rotating facts
+const FACTS = [
+  "Optimized routes can reduce delivery distance by up to 20–30%.",
+  "Clustering deliveries in the same area often saves more time than using the absolute shortest path.",
+  "Even a few minutes saved per route can add up to hours per week for a courier.",
+  "Bike couriers are often faster than cars in dense city centers during rush hour.",
+  "Route optimization is a classic NP-hard problem similar to the travelling salesman problem."
+];
+
 
 function Dashboard() {
   const navigate = useNavigate();
+  const [factIndex, setFactIndex] = useState(0);
+
+  const userName = localStorage.getItem("userName") || "lietotāj";
 
   const handleLogout = () => {
     localStorage.removeItem("token");
-    navigate("/login");
+    localStorage.removeItem("userName");
+    navigate("/");
   };
 
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      setFactIndex((prev) => (prev + 1) % FACTS.length);
+    }, 10000);
+
+    return () => clearInterval(intervalId);
+  }, []);
+
   return (
-    <div style={styles.container}>
-      <div style={styles.card}>
-        <h2 style={styles.title}>📦 Preču piegādes sistēmas panelis</h2>
-        <p>Welcome! You are successfully logged in.</p>
-
-        <div style={styles.menu}>
-          <button style={styles.button} onClick={() => navigate("/routes")}>
-            🗺️ Maršruti
-          </button>
-          <button style={styles.button} onClick={() => navigate("/add-route")}>
-            ➕ Pievienot maršrutu
-          </button>
-          <button style={styles.button}>📊 Statistika</button>
+    <div className="dashboard-page">
+      {/* TOP NAV */}
+      <header className="dashboard-nav">
+        <div className="nav-left">
+          <span className="nav-logo">QuickRoute</span>
         </div>
+        <div className="nav-right">
+          <span className="nav-username">{userName}</span>
+          <button className="nav-logout-button" onClick={handleLogout}>
+            Log Out
+          </button>
+        </div>
+      </header>
 
-        <button onClick={handleLogout} style={styles.logout}>
-          🚪 Log Out
-        </button>
-      </div>
+      {/* FACT BOX ABOVE THE CARD */}
+{/* FACT BOX */}
+<div className="fact-container">
+  <div className="fact-box">
+    <span className="fact-label">Interesting Fact</span>
+    <p className="fact-text">{FACTS[factIndex]}</p>
+  </div>
+</div>
+
+{/* WEATHER WIDGET */}
+<div className="weather-row">
+  <WeatherWidget />
+</div>
+
+
+
+      {/* MAIN WHITE CARD */}
+      <main className="dashboard-main">
+        <div className="dashboard-card">
+          <div className="dashboard-header">
+            <span className="dashboard-emoji">👋</span>
+            <h1 className="dashboard-title">Welcome, {userName}!</h1>
+          </div>
+
+          <p className="dashboard-subtitle">
+            Manage your deliveries quickly and efficiently.
+          </p>
+
+          <div className="dashboard-actions">
+            <button className="dashboard-button" onClick={() => navigate("/routes")}>
+              📦 View routes
+            </button>
+
+            <button className="dashboard-button" onClick={() => navigate("/add-route")}>
+              ➕ Create new route
+            </button>
+
+            <button className="dashboard-button" onClick={() => navigate("/statistics")}>
+              📊 Statistics
+            </button>
+
+            <button className="dashboard-button" onClick={() => navigate("/about")}>
+              📘 About Us
+            </button>
+          </div>
+
+          <button className="dashboard-logout" onClick={handleLogout}>
+            Log Out
+          </button>
+        </div>
+      </main>
     </div>
   );
 }
-
-const styles = {
-  container: {
-    backgroundColor: "#f6f8fa",
-    height: "100vh",
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-    fontFamily: "Arial, sans-serif",
-  },
-  card: {
-    backgroundColor: "white",
-    padding: "40px",
-    borderRadius: "12px",
-    boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
-    width: "450px",
-    textAlign: "center",
-  },
-  title: {
-    marginBottom: "20px",
-    color: "#333",
-  },
-  menu: {
-    display: "flex",
-    flexDirection: "column",
-    gap: "10px",
-    marginTop: "20px",
-    marginBottom: "30px",
-  },
-  button: {
-    width: "100%",
-    padding: "12px",
-    backgroundColor: "#007bff",
-    color: "white",
-    border: "none",
-    borderRadius: "6px",
-    fontSize: "16px",
-    cursor: "pointer",
-  },
-  logout: {
-    marginTop: "10px",
-    padding: "10px",
-    backgroundColor: "#dc3545",
-    color: "white",
-    border: "none",
-    borderRadius: "6px",
-    fontSize: "15px",
-    cursor: "pointer",
-    width: "100%",
-  },
-};
 
 export default Dashboard;

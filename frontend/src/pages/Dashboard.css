@@ -1,0 +1,313 @@
+/* Full-page background (same vibe as login/register) */
+.dashboard-page {
+  width: 100%;
+  min-height: 100vh;
+  background: radial-gradient(circle at top left, #064e3b 0, #022c22 40%, #020617 100%);
+  display: flex;
+  flex-direction: column;
+  color: #f9fafb;
+}
+
+/* TOP NAV BAR */
+.dashboard-nav {
+  height: 64px;
+  padding: 0 3rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(3, 26, 23, 0.9);
+  border-bottom: 1px solid rgba(15, 23, 42, 0.4);
+  box-shadow: 0 10px 25px rgba(15, 23, 42, 0.5);
+}
+
+.nav-left {
+  display: flex;
+  align-items: center;
+}
+
+.nav-logo {
+  font-size: 1.5rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+}
+
+.nav-right {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  font-size: 0.95rem;
+}
+
+.nav-username {
+  opacity: 0.9;
+}
+
+.nav-logout-button {
+  padding: 0.45rem 1rem;
+  border-radius: 999px;
+  border: none;
+  background: #ef4444;
+  color: #f9fafb;
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: background 0.15s ease, transform 0.05s ease;
+}
+
+.nav-logout-button:hover {
+  background: #dc2626;
+}
+
+.nav-logout-button:active {
+  transform: translateY(1px);
+}
+/* FACT BOX ABOVE THE MAIN CARD */
+.fact-container {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  margin-top: 1rem;
+}
+
+.fact-box {
+  background: rgba(236, 253, 245, 0.9); /* light mint with slight transparency */
+  padding: 1rem 1.4rem;
+  border-radius: 1.2rem;
+  max-width: 700px;
+  width: calc(100% - 2rem);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  text-align: center;
+}
+
+.fact-label {
+  display: block;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  font-weight: 700;
+  color: #16a34a;
+  margin-bottom: 0.4rem;
+  letter-spacing: 0.06em;
+}
+
+.fact-text {
+  margin-top: 0.2rem;
+  font-size: 0.95rem;
+  color: #0f172a;
+}
+
+/* MAIN CONTENT AREA */
+.dashboard-main {
+  flex: 1;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 2rem 1.5rem 3.5rem;
+}
+
+/* CENTRAL CARD */
+.dashboard-card {
+  width: 100%;
+  max-width: 560px;
+  background: #f9fafb;
+  color: #0f172a;
+  border-radius: 1.75rem;
+  padding: 2.75rem 3rem 2.5rem;
+  box-shadow: 0 30px 40px rgba(15, 23, 42, 0.45);
+  text-align: center;
+}
+.dashboard-fact {
+  margin-bottom: 1.2rem;
+  padding: 0.7rem 1rem;
+  border-radius: 0.9rem;
+  background: #ecfdf5;
+  text-align: left;
+}
+
+.fact-label {
+  display: block;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #16a34a;
+  font-weight: 700;
+  margin-bottom: 0.2rem;
+}
+
+.fact-text {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #111827;
+}
+
+.dashboard-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  margin-bottom: 0.5rem;
+}
+
+.dashboard-emoji {
+  font-size: 2rem;
+}
+
+.dashboard-title {
+  font-size: 1.9rem;
+  font-weight: 800;
+  margin: 0;
+}
+
+.dashboard-subtitle {
+  margin-top: 0.4rem;
+  margin-bottom: 1.8rem;
+  font-size: 0.98rem;
+  color: #4b5563;
+}
+
+/* BUTTONS */
+.dashboard-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: 1.8rem;
+}
+
+.dashboard-button {
+  width: 100%;
+  padding: 0.9rem 1rem;
+  border-radius: 999px;
+  border: none;
+  background: #16a34a;
+  color: #f9fafb;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.15s ease, transform 0.05s ease, box-shadow 0.15s ease;
+  box-shadow: 0 10px 18px rgba(22, 163, 74, 0.4);
+}
+
+.dashboard-button:hover {
+  background: #15803d;
+}
+
+.dashboard-button:active {
+  transform: translateY(1px);
+}
+
+/* Big red logout button inside the card */
+.dashboard-logout {
+  margin-top: 0.25rem;
+  width: 100%;
+  padding: 0.85rem 1rem;
+  border-radius: 999px;
+  border: none;
+  background: #ef4444;
+  color: #f9fafb;
+  font-weight: 600;
+  font-size: 0.98rem;
+  cursor: pointer;
+  transition: background 0.15s ease, transform 0.05s ease;
+}
+
+.dashboard-logout:hover {
+  background: #dc2626;
+}
+
+.dashboard-logout:active {
+  transform: translateY(1px);
+}
+
+/* RESPONSIVE */
+@media (max-width: 768px) {
+  .dashboard-nav {
+    padding: 0 1.25rem;
+  }
+
+  .dashboard-card {
+    padding: 2.25rem 1.8rem 2.1rem;
+  }
+
+  .dashboard-title {
+    font-size: 1.6rem;
+  }
+
+  .dashboard-subtitle {
+    font-size: 0.9rem;
+  }
+}
+
+.about-main {
+  /* override dashboard-main just for AboutUs */
+  align-items: flex-start;        /* card starts a bit below the nav */
+  padding-top: 60px;              /* gap above the white box */
+  padding-bottom: 60px;           /* equal gap below the white box */
+}
+
+.about-card {
+  width: 90%;
+  max-width: 850px;
+  margin: 0 auto;                 /* center horizontally */
+}
+
+.about-content {
+  margin-top: 1rem;
+  text-align: left;
+  line-height: 1.4;      /* tighter line height */
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;           /* was 1.5rem — now much smaller */
+}
+
+.about-content section h2 {
+  margin-bottom: 0.2rem; /* reduce spacing under headings */
+}
+
+.about-content ul {
+  padding-left: 1rem;    /* slightly smaller indent */
+  margin-top: 0.2rem;    /* reduce gap before bullets */
+  margin-bottom: 0.2rem; /* reduce gap after bullets */
+}
+
+.about-content p {
+  margin: 0.2rem 0;      /* reduce text paragraph spacing */
+}
+
+/* Fix label (optional) input width so it fits inside the green box */
+.stop-row input[type="text"]:first-of-type {
+  width: 96%;  /* Adjust as needed (97–99% works) */
+}
+
+.top-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  margin-top: 18px;
+}
+
+.top-row .fact-container {
+  margin: 0; /* remove extra spacing so row aligns nicely */
+}
+
+/* Make it responsive: on small screens stack vertically */
+@media (max-width: 900px) {
+  .top-row {
+    flex-direction: column;
+  }
+}
+
+/* When fact box is used inside the top row next to the weather widget */
+.top-row .fact-container {
+  width: auto;
+  margin-top: 0;
+  flex: 0 1 auto;
+}
+
+.weather-row {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  margin-top: 14px;
+  margin-bottom: 6px;
+}
+

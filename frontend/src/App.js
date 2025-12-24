@@ -2,27 +2,25 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
-import RoutesList from "./pages/RoutesList";
+import RoutesPage from "./pages/Routes";
 import AddRoute from "./pages/AddRoute";
-import RouteMap from "./pages/RouteMap";
+import AboutUs from "./pages/AboutUs";
+import StatisticsPage from "./pages/StatisticsPage"; // ✅ add this
 
 function App() {
   return (
     <Router>
       <div style={styles.page}>
-        <header style={styles.header}>
-          <h1 style={styles.title}>Preču piegādes sistēma</h1>
-        </header>
-
         <main style={styles.content}>
           <Routes>
             <Route path="/" element={<Login />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/routes" element={<RoutesList />} />
+            <Route path="/routes" element={<RoutesPage />} />
             <Route path="/add-route" element={<AddRoute />} />
-            <Route path="/map/:id" element={<RouteMap />} />
+            <Route path="/statistics" element={<StatisticsPage />} /> {/* ✅ add this */}
+            <Route path="/about" element={<AboutUs />} />
           </Routes>
         </main>
       </div>
