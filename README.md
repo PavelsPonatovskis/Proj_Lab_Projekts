@@ -94,7 +94,6 @@ User ..> "Auth (JWT)" : logs in
 | Datubāze | SQLite | Datu glabāšanai – saglabā informāciju par klientiem, pasūtījumiem, piegādēm un maršrutiem datubāzē. |
 | Autentifikācija | JWT (JSON Web Tokens) | Lietotāju autentifikācijas un autorizācijas nodrošināšanai.
 | Izstrādes vide | Visual Studio Code | Galvenā izstrādes vide projekta programmēšanai, testēšanai un kļūdu labošanai. |
-| Servera izvietošana | Microsoft Azure | Projekta izvietošanai mākoņvidē – ļauj darbināt Flask serveri un React lietotni tiešsaistē, nodrošinot piekļuvi no jebkuras vietas. |
 | Kartes un maršruti | OpenStreetMap, OSRM | Maršrutu aprēķinam un ģeogrāfisko datu attēlošanai, izmantojot atvērtā koda kartogrāfisko datu avotu. | 
 | Datu vizualizācija | Chart.js | Grafiku un diagrammu veidošanai – ļauj attēlot maršrutu statistiku, piegādes laikus un citu analītisku informāciju lietotāja saskarnē. |
 | Servera izvietošana | Render.com | Timekļa lietotnes izvietošanai mākoņvidē. | 
