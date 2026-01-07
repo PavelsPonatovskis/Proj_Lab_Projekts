@@ -7,8 +7,8 @@ Maršrutu plānošana bieži ir sarežģīts uzdevums, kas prasa ņemt vērā da
 
 ## Darba un novērtēšanas mērķis
 
-Darba mērķis ir izstrādāt programmatūras risinājumu, kas nodrošina preču piegādes maršrutu optimizāciju, ņemot vērā dažādus ierobežojumus, piemēram, attālumus, transportlīdzekļu kapacitāti un piegādes laika logus. Projekta ietvaros tiks izveidots algoritmisks modelis, kas spēj ģenerēt efektīvākus maršrutus, samazinot piegādes izmaksas un laiku.
-Novērtēšanas mērķis ir pārbaudīt izstrādātā risinājuma efektivitāti, salīdzinot to ar esošiem maršrutēšanas rīkiem vai piemērojot testdatus, lai analizētu rezultātu kvalitāti un aprēķina precizitāti.
+Darba mērķis ir izstrādāt tīmekļa lietotni preču piegādes maršrutu plānošanai un vizualizācijai, kas ļauj lietotājam izveidot, saglabāt un apskatīt piegādes maršrutus kartē. Izstrādātais risinājums nodrošina maršrutu aprēķinu, izmantojot ārēju maršrutēšanas pakalpojumu, kā arī atbalsta lietotāju autentifikāciju un maršrutu datu uzglabāšanu servera pusē. Sistēma paredzēta kā praktisks rīks loģistikas maršrutu plānošanas atbalstam, nodrošinot pārskatāmu maršrutu attēlošanu un ērtu lietotāja saskarni.
+Novērtēšanas mērķis ir izvērtēt izstrādātās sistēmas funkcionalitāti, stabilitāti un lietojamību, pārbaudot maršrutu izveides, aprēķina un attēlošanas korektumu, kā arī datu saglabāšanu un atjaunošanu. Risinājuma kvalitāte tiek analizēta, balstoties uz testēšanas rezultātiem, sistēmas darbības loģisko pareizību un atbilstību izvirzītajām funkcionālajām prasībām.
 
 ## Līdzīgo risinājumu pārskats 
 
@@ -22,58 +22,66 @@ Novērtēšanas mērķis ir pārbaudīt izstrādātā risinājuma efektivitāti,
 
 ## Konceptu modelis
 
-<img width="928" height="306" alt="image" src="https://github.com/user-attachments/assets/d1b1a2fa-319e-42f4-af8c-369c5085698b" />
+<img width="928" height="306" alt="umlconcept" src="https://github.com/user-attachments/assets/c28eec83-b252-4448-b3e6-13afb1b62214" />
 
 ```plantuml
 @startuml
 left to right direction
-skinparam class {
-  Shadowing false
-  RoundCorner 6
+skinparam classAttributeIconSize 0
+
+class User {
+  +id
+  +email
+  +password_hash
+  +created_at
 }
 
-title Preču piegādes sistēmas konceptuālais modelis
-
-class Klients {
-  id : String
-  vārds : String
-  e_pasts : String
-  adrese : String
-  tālrunis : String
+class Route {
+  +id
+  +name
+  +created_at
+  +status
+  +total_distance_km
+  +total_duration_min
+  +geometry
 }
 
-class Pasūtījums {
-  id : String
-  svarsKg: Float
-  kopējāCena: Float
+class Stop {
+  +id
+  +route_id
+  +order
+  +lat
+  +lng
+  +type
 }
 
-class Piegāde {
-  id : String
-  adrese : String
-  datums : Date
-  laiksNo : Time
-  laiksLīdz : Time
-  statuss : String
+class Warehouse <<static>> {
+  +id
+  +name
+  +lat
+  +lng
 }
 
-class Maršruts {
-  id : String
-  kopējaisAttālums : Float
-  sākumaPunkts: String
-  galamērķis : String
+enum RouteStatus {
+  CALCULATING
+  READY
+  FAILED
 }
 
-class Kurjers {
-  id : String
-  vārds : String
-  pieejamība : Boolean
+class "OSRM Service" <<external>> {
+  +route(points)
+  +distance_time()
 }
 
-Klients "1" --> "1..*" Pasūtījums : veic / ir saistīts ar
-Pasūtījums "1" --> "1" Piegāde : ir saistīts ar
-Piegāde "1" --> "1" Maršruts : izmanto
-Kurjers "1" --> "1..*" Piegāde : izpilda
+class "Auth (JWT)" <<security>>
+
+User "1" --> "0..*" Route : creates
+Route "1" --> "1..*" Stop : consists of
+Stop "0..*" --> "0..1" Warehouse : refers to
+
+Route --> RouteStatus : status
+Route ..> "OSRM Service" : requests\nroute metrics
+User ..> "Auth (JWT)" : logs in
 
 @enduml
 ```
@@ -81,10 +89,12 @@ Kurjers "1" --> "1..*" Piegāde : izpilda
 
 | Slānis | Tehnoloģija | Apraksts |
 |--------|--------------|-----------|
-| Frontend | React.js | Lietotāja saskarnes izstrādei – nodrošina interaktīvu un dinamisku tīmekļa vidi, kur lietotājs var apskatīt un pārvaldīt pasūtījumus un maršrutus. |
+| Frontend | React.js, CSS | Lietotāja saskarnes izstrādei – nodrošina interaktīvu un dinamisku tīmekļa vidi, kur lietotājs var apskatīt un pārvaldīt pasūtījumus un maršrutus. CSS tiek izmantots lietotnes vizuālajam noformējumam un izkārtojumam. |
 | Backend | Flask | Servera loģikas īstenošanai – apstrādā lietotāja pieprasījumus, veic datu apstrādi un savienojumu ar datubāzi. |
 | Datubāze | SQLite | Datu glabāšanai – saglabā informāciju par klientiem, pasūtījumiem, piegādēm un maršrutiem datubāzē. |
+| Autentifikācija | JWT (JSON Web Tokens) | Lietotāju autentifikācijas un autorizācijas nodrošināšanai.
 | Izstrādes vide | Visual Studio Code | Galvenā izstrādes vide projekta programmēšanai, testēšanai un kļūdu labošanai. |
 | Servera izvietošana | Microsoft Azure | Projekta izvietošanai mākoņvidē – ļauj darbināt Flask serveri un React lietotni tiešsaistē, nodrošinot piekļuvi no jebkuras vietas. |
 | Kartes un maršruti | OpenStreetMap, OSRM | Maršrutu aprēķinam un ģeogrāfisko datu attēlošanai, izmantojot atvērtā koda kartogrāfisko datu avotu. | 
 | Datu vizualizācija | Chart.js | Grafiku un diagrammu veidošanai – ļauj attēlot maršrutu statistiku, piegādes laikus un citu analītisku informāciju lietotāja saskarnē. |
+| Servera izvietošana | Render.com | Timekļa lietotnes izvietošanai mākoņvidē. | 
