@@ -1,24 +1,24 @@
-const API_BASE = process.env.REACT_APP_API_BASE || "http://127.0.0.1:5000";
+const RAW_API_BASE = (process.env.REACT_APP_API_BASE_URL || "").trim();
+const API_BASE = RAW_API_BASE.replace(/\/$/, "");
 
-function authHeaders() {
-  const token = localStorage.getItem("token") || localStorage.getItem("access_token");
-  return {
-    "Content-Type": "application/json",
-    ...(token ? { Authorization: `Bearer ${token}` } : {}),
-  };
+function apiUrl(path) {
+  if (!path.startsWith("/")) return API_BASE ? `${API_BASE}/${path}` : `/${path}`;
+  return API_BASE ? `${API_BASE}${path}` : path;
 }
 
 export async function fetchWarehouses() {
-  const res = await fetch(`${API_BASE}/api/routes/warehouses`, {
-    method: "GET",
-    headers: authHeaders(),
-  });
+  const res = await fetch(apiUrl("/api/routes/warehouses"));
+  const text = await res.text();
 
   if (!res.ok) {
-    const text = await res.text().catch(() => "");
-    throw new Error(text || `Failed to load warehouses (${res.status})`);
+    throw new Error(text || `Failed to fetch warehouses (${res.status})`);
   }
 
-  const data = await res.json();
-  return data.items || [];
+  if (!text || !text.trim()) return [];
+  try {
+    const data = JSON.parse(text);
+    return data?.items || data || [];
+  } catch {
+    return [];
+  }
 }
