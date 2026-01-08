@@ -1,13 +1,21 @@
+
 import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./Dashboard.css";
 import "./AddRoute.css";
-import { MapContainer, TileLayer, Marker, Tooltip, useMapEvents } from "react-leaflet";
+import {
+  MapContainer,
+  TileLayer,
+  Marker,
+  Tooltip,
+  useMapEvents,
+} from "react-leaflet";
 import L from "leaflet";
 import markerIcon2x from "leaflet/dist/images/marker-icon-2x.png";
 import markerIcon from "leaflet/dist/images/marker-icon.png";
 import markerShadow from "leaflet/dist/images/marker-shadow.png";
 import { fetchWarehouses } from "../api/warehousesApi";
+
 
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -15,6 +23,7 @@ L.Icon.Default.mergeOptions({
   iconUrl: markerIcon,
   shadowUrl: markerShadow,
 });
+
 
 const warehouseIcon = new L.Icon({
   iconUrl:
@@ -26,9 +35,20 @@ const warehouseIcon = new L.Icon({
   shadowSize: [41, 41],
 });
 
+
+const RAW_API_BASE = (process.env.REACT_APP_API_BASE_URL || "").trim();
+const API_BASE = RAW_API_BASE.replace(/\/$/, ""); 
+
+function apiUrl(path) {
+  
+  if (!path.startsWith("/")) return API_BASE ? `${API_BASE}/${path}` : `/${path}`;
+  return API_BASE ? `${API_BASE}${path}` : path;
+}
+
 function MapClickHandler({ activeStopId, setStops }) {
   useMapEvents({
     click(e) {
+      if (!activeStopId) return;
       const { lat, lng } = e.latlng;
       setStops((prev) =>
         prev.map((stop) =>
@@ -65,6 +85,7 @@ function AddRoute() {
     async function loadWarehouses() {
       setWhError("");
       try {
+
         const list = await fetchWarehouses();
         if (!alive) return;
         setWarehouses(list || []);
@@ -97,7 +118,12 @@ function AddRoute() {
     setStops((prev) => {
       const next = prev.filter((s) => s.id !== id);
       if (activeStopId === id && next.length > 0) setActiveStopId(next[0].id);
-      return next.length > 0 ? next : [{ id: Date.now(), label: "", lat: "", lng: "" }];
+      if (next.length === 0) {
+        const newId = Date.now();
+        setActiveStopId(newId);
+        return [{ id: newId, label: "", lat: "", lng: "" }];
+      }
+      return next;
     });
   };
 
@@ -142,7 +168,8 @@ function AddRoute() {
     }
 
     try {
-      const createResp = await fetch("http://127.0.0.1:5000/api/routes/", {
+      
+      const createResp = await fetch(apiUrl("/api/routes/"), {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -170,6 +197,7 @@ function AddRoute() {
         return;
       }
 
+      
       let routeId = null;
       if (debugText && debugText.trim() !== "") {
         try {
@@ -180,8 +208,9 @@ function AddRoute() {
         }
       }
 
+      
       if (!routeId) {
-        const listResp = await fetch("http://127.0.0.1:5000/api/routes/", {
+        const listResp = await fetch(apiUrl("/api/routes/"), {
           headers: { Authorization: `Bearer ${token}` },
         });
 
@@ -210,17 +239,14 @@ function AddRoute() {
           lon: Number(stop.lng),
         };
 
-        const clientResp = await fetch(
-          `http://127.0.0.1:5000/api/routes/${routeId}/clients`,
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${token}`,
-            },
-            body: JSON.stringify(clientPayload),
-          }
-        );
+        const clientResp = await fetch(apiUrl(`/api/routes/${routeId}/clients`), {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify(clientPayload),
+        });
 
         if (!clientResp.ok) {
           console.error("Failed to add client", i + 1, clientResp.status);
@@ -230,9 +256,10 @@ function AddRoute() {
 
       alert("✅ Route saved!");
 
+      const newId = Date.now();
       setRouteName("");
-      setStops([{ id: Date.now(), label: "", lat: "", lng: "" }]);
-      setActiveStopId(1);
+      setStops([{ id: newId, label: "", lat: "", lng: "" }]);
+      setActiveStopId(newId);
     } catch (err) {
       console.error("Unexpected error while saving the route:", err);
       alert("❌ Error while saving the route: " + (err.message || "see console"));
@@ -364,7 +391,14 @@ function AddRoute() {
               </p>
 
               {whError && (
-                <div style={{ marginBottom: 10, padding: 10, borderRadius: 10, background: "#ffe8e8" }}>
+                <div
+                  style={{
+                    marginBottom: 10,
+                    padding: 10,
+                    borderRadius: 10,
+                    background: "#ffe8e8",
+                  }}
+                >
                   <strong>Warehouse load error:</strong> {whError}
                 </div>
               )}
@@ -391,7 +425,13 @@ function AddRoute() {
                 ))}
 
                 {stops
-                  .filter((s) => s.lat && s.lng && !isNaN(Number(s.lat)) && !isNaN(Number(s.lng)))
+                  .filter(
+                    (s) =>
+                      s.lat &&
+                      s.lng &&
+                      !isNaN(Number(s.lat)) &&
+                      !isNaN(Number(s.lng))
+                  )
                   .map((s) => (
                     <Marker key={s.id} position={[parseFloat(s.lat), parseFloat(s.lng)]} />
                   ))}
