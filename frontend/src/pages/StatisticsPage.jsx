@@ -55,7 +55,7 @@ export default function StatisticsPage() {
   const [includeDeleted, setIncludeDeleted] = useState(true);
   const [data, setData] = useState(null);
 
-  // ✅ Per-route include map (local only). Default: included.
+
   const [includedMap, setIncludedMap] = useState(() => {
     try {
       return JSON.parse(localStorage.getItem("statsIncludedMap") || "{}");
@@ -68,12 +68,12 @@ export default function StatisticsPage() {
     localStorage.setItem("statsIncludedMap", JSON.stringify(includedMap));
   }, [includedMap]);
 
-  const isIncluded = (id) => includedMap[id] !== false; // default true
+  const isIncluded = (id) => includedMap[id] !== false; 
 
   const toggleIncluded = (id) => {
     setIncludedMap((prev) => {
       const next = { ...prev };
-      next[id] = !(prev[id] !== false); // toggle
+      next[id] = !(prev[id] !== false); 
       return next;
     });
   };
@@ -124,7 +124,6 @@ export default function StatisticsPage() {
   const itemsAll = data?.items || [];
   const itemsIncluded = itemsAll.filter((r) => isIncluded(r.id));
 
-  // ✅ recompute totals from INCLUDED routes only
   const derivedTotals = useMemo(() => {
     const routesTotal = itemsIncluded.length;
     const routesActive = itemsIncluded.filter((r) => !r.is_deleted).length;
@@ -185,7 +184,7 @@ export default function StatisticsPage() {
     };
   }, [itemsIncluded]);
 
-  // ✅ ONE dataset that contains BOTH distance + time values per route
+
   const chartData = useMemo(() => {
     const comparable = itemsIncluded.filter((r) => r.comparable);
     const sorted = [...comparable].sort(
@@ -212,7 +211,7 @@ export default function StatisticsPage() {
       className="dashboard-page"
       style={{ background: theme.bgGradient, height: "100vh" }}
     >
-      {/* TOP NAV */}
+      
       <header className="dashboard-nav">
         <div className="nav-left">
           <span className="nav-logo">QuickRoute</span>
@@ -225,7 +224,7 @@ export default function StatisticsPage() {
         </div>
       </header>
 
-      {/* Scroll container */}
+      
       <div
         style={{
           flex: 1,
@@ -240,7 +239,7 @@ export default function StatisticsPage() {
         }}
       >
         <div style={{ width: "100%", maxWidth: 1100, paddingBottom: 40 }}>
-          {/* Header row */}
+          
           <div
             style={{
               display: "flex",
@@ -280,7 +279,7 @@ export default function StatisticsPage() {
             </label>
           </div>
 
-          {/* Loading / Error */}
+          
           {loading && (
             <div
               style={{
@@ -311,7 +310,7 @@ export default function StatisticsPage() {
 
           {!loading && !error && (
             <>
-              {/* Banner */}
+              
               <div
                 style={{
                   marginTop: 18,
@@ -335,7 +334,7 @@ export default function StatisticsPage() {
                 time overall 🚀
               </div>
 
-              {/* Include controls */}
+              
               <div
                 style={{
                   marginTop: 10,
@@ -386,7 +385,7 @@ export default function StatisticsPage() {
                 </div>
               </div>
 
-              {/* KPI cards */}
+              
               <div
                 style={{
                   marginTop: 16,
@@ -447,7 +446,7 @@ export default function StatisticsPage() {
                 />
               </div>
 
-              {/* Chart: DISTANCE */}
+              
               <div
                 style={{
                   marginTop: 18,
@@ -507,7 +506,7 @@ export default function StatisticsPage() {
                 )}
               </div>
 
-              {/* ✅ NEW Chart: TIME */}
+              
               <div
                 style={{
                   marginTop: 18,
@@ -567,7 +566,7 @@ export default function StatisticsPage() {
                 )}
               </div>
 
-              {/* Table */}
+              
               <div
                 style={{
                   marginTop: 18,

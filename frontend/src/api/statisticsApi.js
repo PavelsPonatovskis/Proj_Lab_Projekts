@@ -8,10 +8,7 @@ function authHeaders() {
     ...(token ? { Authorization: `Bearer ${token}` } : {}),
   };
 }
-/**
- * Backend endpoint:
- * GET /api/routes/stats?scope=all|active
- */
+
 export async function fetchStatistics({ includeDeleted = true } = {}) {
   const url = new URL(`${API_BASE}/api/routes/stats`);
   url.searchParams.set("scope", includeDeleted ? "all" : "active");

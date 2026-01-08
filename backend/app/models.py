@@ -26,12 +26,10 @@ class Route(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(255), nullable=False)
 
-    # ✅ FIX: Mutable JSON so in-place changes persist
     parameters = db.Column(MutableDict.as_mutable(db.JSON), nullable=True)
 
     created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
 
-    # ✅ NEW (Soft delete / archive)
     is_deleted = db.Column(db.Boolean, nullable=False, default=False)
     deleted_at = db.Column(db.DateTime, nullable=True)
 
@@ -47,7 +45,6 @@ class Route(db.Model):
             "name": self.name,
             "parameters": self.parameters,
             "created_at": self.created_at.isoformat(),
-            # ✅ NEW (optional to expose; useful for stats/debug)
             "is_deleted": self.is_deleted,
             "deleted_at": self.deleted_at.isoformat() if self.deleted_at else None,
             "clients": [c.to_dict() for c in self.clients],

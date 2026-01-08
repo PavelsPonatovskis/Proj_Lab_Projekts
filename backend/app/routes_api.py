@@ -9,9 +9,6 @@ import requests
 
 routes_bp = Blueprint("routes", __name__)
 
-# -------------------------
-# Phase 2: Warehouses (hardcoded for now) — UPDATED to your coords
-# -------------------------
 WAREHOUSES = [
     {"id": 1, "name": "Warehouse 1", "lat": 56.969109, "lng": 24.112366},
     {"id": 2, "name": "Warehouse 2", "lat": 56.939166, "lng": 24.055983},
@@ -22,9 +19,6 @@ OSRM_BASE = "https://router.project-osrm.org"
 GOOGLE_DIRECTIONS_URL = "https://maps.googleapis.com/maps/api/directions/json"
 
 
-# -------------------------
-# OSRM helpers
-# -------------------------
 def _osrm_route_metrics(points, profile="driving", timeout=12):
     """
     points: list of {"lat":..,"lng":..}
@@ -80,9 +74,6 @@ def _osrm_table(points, profile="driving", timeout=12):
     return durations
 
 
-# -------------------------
-# Google (Traffic ETA) helper
-# -------------------------
 def _google_traffic_eta(points, timeout=12):
     """
     points: list of {"lat":..,"lng":..} in route order
@@ -104,7 +95,7 @@ def _google_traffic_eta(points, timeout=12):
         "origin": origin,
         "destination": destination,
         "mode": "driving",
-        "departure_time": "now",  # enables duration_in_traffic for driving
+        "departure_time": "now",  
         "key": api_key,
     }
 
@@ -134,16 +125,12 @@ def _google_traffic_eta(points, timeout=12):
         normal_s += int((leg.get("duration") or {}).get("value") or 0)
         traffic_s += int((leg.get("duration_in_traffic") or {}).get("value") or 0)
 
-    # Fallback if traffic missing for some reason
     if traffic_s == 0:
         traffic_s = normal_s
 
     return {"traffic_duration": traffic_s, "duration": normal_s, "distance": dist_m}
 
 
-# -------------------------
-# Optimization helpers
-# -------------------------
 def _nearest_neighbor_order(durations):
     """
     durations: NxN
@@ -210,10 +197,6 @@ def _two_opt(order, durations, max_iters=50):
 
     return best
 
-
-# -------------------------
-# Serialization helper
-# -------------------------
 def route_to_dict(r: Route):
     params = r.parameters or {}
     baseline = params.get("baseline")
@@ -244,10 +227,6 @@ def route_to_dict(r: Route):
         ],
     }
 
-
-# -------------------------
-# Stats helpers + endpoint (NEW)
-# -------------------------
 def _safe_float(x):
     try:
         return float(x)
@@ -277,13 +256,12 @@ def _get_traffic_seconds(obj):
 def routes_stats():
     uid = get_jwt_identity()
 
-    # scope=all includes archived; scope=active excludes archived
     scope = request.args.get("scope", "all").lower()
     include_deleted = scope == "all"
 
     q = Route.query.filter_by(user_id=uid)
     if not include_deleted:
-        q = q.filter(Route.is_deleted == False)  # noqa: E712
+        q = q.filter(Route.is_deleted == False)  
 
     routes = q.all()
 
@@ -294,8 +272,8 @@ def routes_stats():
         "stops_total": sum(len(r.clients or []) for r in routes),
         "baseline_distance_m": 0.0,
         "optimized_distance_m": 0.0,
-        "baseline_time_s": 0.0,   # traffic-aware where possible
-        "optimized_time_s": 0.0,  # traffic-aware where possible
+        "baseline_time_s": 0.0,   
+        "optimized_time_s": 0.0,  
         "routes_with_baseline": 0,
         "routes_with_optimized": 0,
         "routes_comparable": 0,
@@ -373,24 +351,17 @@ def routes_stats():
     }
 
 
-# -------------------------
-# Warehouses endpoint
-# -------------------------
 @routes_bp.get("/warehouses")
 @jwt_required()
 def list_warehouses():
     return {"items": WAREHOUSES}
 
 
-# -------------------------
-# Routes CRUD
-# -------------------------
 @routes_bp.get("/")
 @jwt_required()
 def list_routes():
     uid = get_jwt_identity()
 
-    # include deleted routes only when requested
     include_deleted = request.args.get("include_deleted", "0") == "1"
 
     q = Route.query.filter_by(user_id=uid)
@@ -441,7 +412,6 @@ def update_route(route_id):
     if not r:
         return {"error": "route not found"}, 404
 
-    # don't allow editing archived routes
     if getattr(r, "is_deleted", False):
         return {"error": "route is archived"}, 400
 
@@ -479,7 +449,6 @@ def delete_route(route_id):
     if not r:
         return {"error": "route not found"}, 404
 
-    # soft delete (archive)
     if getattr(r, "is_deleted", False):
         return {"message": "already archived"}
 
@@ -490,7 +459,6 @@ def delete_route(route_id):
     return {"message": "archived"}
 
 
-# ✅ NEW: hard delete endpoint (only after archived)
 @routes_bp.delete("/<int:route_id>/permanent")
 @jwt_required()
 def delete_route_permanently(route_id):
@@ -506,10 +474,6 @@ def delete_route_permanently(route_id):
     db.session.commit()
     return {"message": "permanently deleted"}
 
-
-# -------------------------
-# Clients CRUD
-# -------------------------
 @routes_bp.post("/<int:route_id>/clients")
 @jwt_required()
 def add_client(route_id):
@@ -557,9 +521,6 @@ def delete_client(route_id, client_id):
     return {"message": "deleted"}
 
 
-# -------------------------
-# Matrix upload (kept)
-# -------------------------
 @routes_bp.post("/<int:route_id>/matrix")
 @jwt_required()
 def upload_distance_matrix(route_id):
@@ -584,9 +545,6 @@ def upload_distance_matrix(route_id):
     return {"message": "Matrix uploaded successfully", "route": route_to_dict(r)}
 
 
-# -------------------------
-# Baseline computation endpoint
-# -------------------------
 @routes_bp.post("/<int:route_id>/baseline")
 @jwt_required()
 def compute_baseline(route_id):
@@ -633,9 +591,6 @@ def compute_baseline(route_id):
     return {"message": "baseline computed", "route": route_to_dict(r)}
 
 
-# -------------------------
-# Optimization endpoint (store order under key "order")
-# -------------------------
 @routes_bp.post("/<int:route_id>/optimize")
 @jwt_required()
 def optimize_route(route_id):

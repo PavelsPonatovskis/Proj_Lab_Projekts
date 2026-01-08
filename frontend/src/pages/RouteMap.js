@@ -47,8 +47,8 @@ function RouteMap() {
         const routeInfo = data.routes[0];
         setOsrmData({
           coordinates: routeInfo.geometry.coordinates.map((p) => [p[1], p[0]]),
-          distance: (routeInfo.distance / 1000).toFixed(2), // km
-          duration: (routeInfo.duration / 60).toFixed(1), // minutes
+          distance: (routeInfo.distance / 1000).toFixed(2), 
+          duration: (routeInfo.duration / 60).toFixed(1), 
         });
       }
     } catch (err) {
@@ -106,7 +106,6 @@ function RouteMap() {
               </Marker>
             ))}
 
-            {/* 🚗 Draw real road route */}
             {osrmData && (
               <Polyline positions={osrmData.coordinates} color="blue" />
             )}

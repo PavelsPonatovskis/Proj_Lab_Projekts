@@ -5,7 +5,7 @@ import Dashboard from "./pages/Dashboard";
 import RoutesPage from "./pages/Routes";
 import AddRoute from "./pages/AddRoute";
 import AboutUs from "./pages/AboutUs";
-import StatisticsPage from "./pages/StatisticsPage"; // ✅ add this
+import StatisticsPage from "./pages/StatisticsPage"; 
 
 function App() {
   return (

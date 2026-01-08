@@ -1,4 +1,4 @@
-// src/pages/Routes.js
+
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { buildRoadRoute } from "../utils/osrm";
 import { useNavigate } from "react-router-dom";
@@ -17,7 +17,7 @@ import markerIcon2x from "leaflet/dist/images/marker-icon-2x.png";
 import markerIcon from "leaflet/dist/images/marker-icon.png";
 import markerShadow from "leaflet/dist/images/marker-shadow.png";
 
-// Fix Leaflet default marker icons (blue)
+
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: markerIcon2x,
@@ -25,14 +25,14 @@ L.Icon.Default.mergeOptions({
   shadowUrl: markerShadow,
 });
 
-/** Warehouses (3) — your coords */
+
 const WAREHOUSES = [
   { id: 1, name: "Warehouse 1", lat: 56.969109, lng: 24.112366 },
   { id: 2, name: "Warehouse 2", lat: 56.939166, lng: 24.055983 },
   { id: 3, name: "Warehouse 3", lat: 56.952044, lng: 24.158705 },
 ];
 
-/** Warehouse marker icon (red) */
+
 const warehouseIcon = new L.Icon({
   iconUrl:
     "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png",
@@ -43,7 +43,7 @@ const warehouseIcon = new L.Icon({
   shadowSize: [41, 41],
 });
 
-/** Numbered stop icon: baseline (grey) vs optimized (green) */
+
 function makeNumberedStopIcon(num, variant = "optimized") {
   const extraClass = variant === "baseline" ? "stop-number-badge--baseline" : "";
   return L.divIcon({
@@ -54,7 +54,7 @@ function makeNumberedStopIcon(num, variant = "optimized") {
   });
 }
 
-/** Offset helper: prevents baseline/optimized markers overlapping */
+
 function offsetLatLng(lat, lng, dx = 0, dy = 0) {
   return [lat + dy, lng + dx];
 }
@@ -76,7 +76,7 @@ const pct = (base, val) => {
   return ((base - val) / base) * 100;
 };
 
-// ---- helpers ----
+
 function toNum(v) {
   const n = Number(v);
   return Number.isFinite(n) ? n : null;
@@ -93,7 +93,7 @@ function getWarehouseById(id) {
   return WAREHOUSES.find((w) => w.id === id) || WAREHOUSES[0];
 }
 
-// read Google traffic seconds (if available)
+
 function getTrafficSeconds(section) {
   const t = section?.traffic;
   if (!t || t.error) return null;
@@ -101,12 +101,12 @@ function getTrafficSeconds(section) {
   return Number.isFinite(s) && s > 0 ? s : null;
 }
 
-// prefer traffic time when available
+
 function bestTimeSeconds(section) {
   return getTrafficSeconds(section) ?? section?.duration ?? null;
 }
 
-// Build baseline stops: Warehouse #1 + clients in DB order
+
 function buildBaselineStops(route) {
   const wh = WAREHOUSES[0];
   return [
@@ -115,7 +115,7 @@ function buildBaselineStops(route) {
   ];
 }
 
-// Build optimized stops: chosen warehouse + clients in optimized.order
+
 function buildOptimizedStops(route) {
   const opt = route.optimized;
   if (!opt?.order?.length) return null;
@@ -130,7 +130,7 @@ function buildOptimizedStops(route) {
   ];
 }
 
-// Fit bounds to focused route (include both lines if present)
+
 function FitToRoute({ baselineLatLngs, optimizedLatLngs }) {
   const map = useMap();
 
@@ -164,7 +164,7 @@ function Routes() {
 
   useEffect(() => {
     fetchRoutes();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+
   }, []);
 
   const handleLogout = () => {
@@ -240,7 +240,7 @@ function Routes() {
       setRouteGeometries({});
       setRoutingLoading({});
 
-      // Auto-compute baseline for routes missing it
+
       const missingBaseline = processed.filter((r) => !r.baseline);
       for (const r of missingBaseline) {
         if (baselineInFlightRef.current.has(r.id)) continue;
@@ -329,7 +329,7 @@ function Routes() {
     [routes, focusedRouteId]
   );
 
-  // Build both polylines (baseline + optimized) for visible routes
+
   useEffect(() => {
     if (loading || error) return;
     if (visibleRoutes.length === 0) return;
@@ -443,7 +443,7 @@ function Routes() {
     });
   };
 
-  // Optimize button handler: update optimized + force rebuild of geometries
+
   const handleOptimize = async (routeId) => {
     if (optimizeInFlightRef.current.has(routeId)) return;
     optimizeInFlightRef.current.add(routeId);
@@ -476,9 +476,8 @@ function Routes() {
   const focusedBaselineLatLngs = focusedGeo?.baseline?.latlngs || null;
   const focusedOptimizedLatLngs = focusedGeo?.optimized?.latlngs || null;
 
-  // offsets (small, but enough to prevent marker overlap at mid zoom)
-  const BASELINE_OFF = { dx: -0.00018, dy: -0.00010 }; // down-left
-  const OPTIMIZED_OFF = { dx: +0.00018, dy: +0.00010 }; // up-right
+  const BASELINE_OFF = { dx: -0.00018, dy: -0.00010 }; 
+  const OPTIMIZED_OFF = { dx: +0.00018, dy: +0.00010 }; 
 
   return (
     <div className="dashboard-page">
@@ -727,15 +726,14 @@ function Routes() {
                           />
                         )}
 
-                        {/* Number markers only for focused route */}
                         {isFocused &&
                           (() => {
                             const clients = route.clients || [];
 
-                            // baseline numbering = DB order (clients array order)
+                            
                             const baselineNumbers = clients.map((c, idx) => ({ client: c, n: idx + 1 }));
 
-                            // optimized numbering = optimized.order
+                           
                             const order = route.optimized?.order || [];
                             const byId = new Map(clients.map((c) => [c.id, c]));
                             const optimizedNumbers = order
@@ -750,7 +748,7 @@ function Routes() {
 
                             return (
                               <>
-                                {/* Baseline markers (grey, offset when optimized exists) */}
+                                
                                 {baselineNumbers.map(({ client, n }) => (
                                   <Marker
                                     key={`${route.id}-baseline-num-${client.id ?? n}`}
@@ -765,7 +763,7 @@ function Routes() {
                                   />
                                 ))}
 
-                                {/* Optimized markers (green, always offset, always on top) */}
+                                
                                 {optimizedNumbers.map(({ client, n }) => (
                                   <Marker
                                     key={`${route.id}-opt-num-${client.id ?? n}`}

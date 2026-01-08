@@ -1,7 +1,6 @@
 .add-route-card {
   max-width: 1100px;
 
-  /* keep the whole card fixed */
   max-height: calc(100vh - 140px);
   overflow: hidden;
 
@@ -9,7 +8,6 @@
   flex-direction: column;
 }
 
-/* two-column layout: form + map */
 .add-route-layout {
   display: grid;
   grid-template-columns: 1.1fr 1fr;
@@ -20,7 +18,7 @@
   min-height: 0;
 }
 
-/* LEFT – form */
+
 .add-route-form {
   min-height: 0;
   display: flex;
@@ -57,7 +55,7 @@
   align-items: center;
 }
 
-/* “Add stop” button */
+
 .small-button {
   border: none;
   border-radius: 999px;
@@ -87,14 +85,14 @@
   margin-top: 0.3rem;
 }
 
-/* ✅ FINAL FIX: stops scroll early, page never does */
+
 .stops-list {
   margin-top: 0.7rem;
   display: flex;
   flex-direction: column;
   gap: 0.6rem;
 
-  /* fits about ~2 stop rows comfortably */
+
   max-height: 260px;
   overflow-y: auto;
   padding-right: 0.3rem;
@@ -158,7 +156,7 @@
   flex: 1;
 }
 
-/* submit & back buttons */
+
 .submit-route {
   margin-top: 1rem;
 }
@@ -167,7 +165,7 @@
   margin-top: 0.5rem;
 }
 
-/* RIGHT – map */
+
 .add-route-map-wrapper {
   text-align: left;
 }
@@ -184,7 +182,7 @@
   margin-bottom: 0.6rem;
 }
 
-/* keep map from growing */
+
 .add-route-map {
   width: 100%;
   height: 320px;
@@ -199,7 +197,7 @@
   box-shadow: 0 12px 26px rgba(0, 0, 0, 0.18);
 }
 
-/* RESPONSIVE */
+
 @media (max-width: 900px) {
   .add-route-card {
     max-height: none;

@@ -1,6 +1,5 @@
 @import "leaflet/dist/leaflet.css";
 
-/* Step 2 – global layout so the app can fill the whole screen */
 html,
 body,
 #root {
@@ -9,8 +8,7 @@ body,
   padding: 0;
 }
 
-/* Step 1 – keep only a minimal .App class, no max-width, no centering box */
 .App {
   text-align: center;
-  min-height: 100vh; /* lets children (like .login-page) stretch full height */
+  min-height: 100vh; 
 }

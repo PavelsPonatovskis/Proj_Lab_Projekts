@@ -13,21 +13,18 @@ def register():
     email = (payload.get("email") or "").strip().lower()
     password = payload.get("password")
 
-    # Validate fields
     if not name or not email or not password:
         return {"error": "name, email and password are required"}, 400
 
     if User.query.filter_by(email=email).first():
         return {"error": "email already registered"}, 409
 
-    # Create new user
     user = User(name=name, email=email)
     user.set_password(password)
 
     db.session.add(user)
     db.session.commit()
 
-    # Create token
     token = create_access_token(identity=str(user.id))
 
     return {"message": "registered", "token": token, "name": name}
@@ -52,5 +49,5 @@ def login():
     return {
         "message": "ok",
         "token": token,
-        "name": user.name       # <-- NEW
+        "name": user.name       
     }

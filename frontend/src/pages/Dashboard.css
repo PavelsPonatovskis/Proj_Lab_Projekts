@@ -1,4 +1,3 @@
-/* Full-page background (same vibe as login/register) */
 .dashboard-page {
   width: 100%;
   min-height: 100vh;
@@ -8,7 +7,6 @@
   color: #f9fafb;
 }
 
-/* TOP NAV BAR */
 .dashboard-nav {
   height: 64px;
   padding: 0 3rem;
@@ -61,7 +59,7 @@
 .nav-logout-button:active {
   transform: translateY(1px);
 }
-/* FACT BOX ABOVE THE MAIN CARD */
+
 .fact-container {
   width: 100%;
   display: flex;
@@ -70,7 +68,7 @@
 }
 
 .fact-box {
-  background: rgba(236, 253, 245, 0.9); /* light mint with slight transparency */
+  background: rgba(236, 253, 245, 0.9); 
   padding: 1rem 1.4rem;
   border-radius: 1.2rem;
   max-width: 700px;
@@ -95,7 +93,6 @@
   color: #0f172a;
 }
 
-/* MAIN CONTENT AREA */
 .dashboard-main {
   flex: 1;
   display: flex;
@@ -104,7 +101,6 @@
   padding: 2rem 1.5rem 3.5rem;
 }
 
-/* CENTRAL CARD */
 .dashboard-card {
   width: 100%;
   max-width: 560px;
@@ -164,7 +160,7 @@
   color: #4b5563;
 }
 
-/* BUTTONS */
+
 .dashboard-actions {
   display: flex;
   flex-direction: column;
@@ -194,7 +190,7 @@
   transform: translateY(1px);
 }
 
-/* Big red logout button inside the card */
+
 .dashboard-logout {
   margin-top: 0.25rem;
   width: 100%;
@@ -217,7 +213,7 @@
   transform: translateY(1px);
 }
 
-/* RESPONSIVE */
+
 @media (max-width: 768px) {
   .dashboard-nav {
     padding: 0 1.25rem;
@@ -237,44 +233,43 @@
 }
 
 .about-main {
-  /* override dashboard-main just for AboutUs */
-  align-items: flex-start;        /* card starts a bit below the nav */
-  padding-top: 60px;              /* gap above the white box */
-  padding-bottom: 60px;           /* equal gap below the white box */
+  
+  align-items: flex-start;        
+  padding-top: 60px;              
+  padding-bottom: 60px;           
 }
 
 .about-card {
   width: 90%;
   max-width: 850px;
-  margin: 0 auto;                 /* center horizontally */
+  margin: 0 auto;                 
 }
 
 .about-content {
   margin-top: 1rem;
   text-align: left;
-  line-height: 1.4;      /* tighter line height */
+  line-height: 1.4;      
   display: flex;
   flex-direction: column;
-  gap: 0.6rem;           /* was 1.5rem — now much smaller */
+  gap: 0.6rem;           
 }
 
 .about-content section h2 {
-  margin-bottom: 0.2rem; /* reduce spacing under headings */
+  margin-bottom: 0.2rem; 
 }
 
 .about-content ul {
-  padding-left: 1rem;    /* slightly smaller indent */
-  margin-top: 0.2rem;    /* reduce gap before bullets */
-  margin-bottom: 0.2rem; /* reduce gap after bullets */
+  padding-left: 1rem;    
+  margin-top: 0.2rem;    
+  margin-bottom: 0.2rem; 
 }
 
 .about-content p {
-  margin: 0.2rem 0;      /* reduce text paragraph spacing */
+  margin: 0.2rem 0;      
 }
 
-/* Fix label (optional) input width so it fits inside the green box */
 .stop-row input[type="text"]:first-of-type {
-  width: 96%;  /* Adjust as needed (97–99% works) */
+  width: 96%;  
 }
 
 .top-row {
@@ -286,17 +281,16 @@
 }
 
 .top-row .fact-container {
-  margin: 0; /* remove extra spacing so row aligns nicely */
+  margin: 0; 
 }
 
-/* Make it responsive: on small screens stack vertically */
 @media (max-width: 900px) {
   .top-row {
     flex-direction: column;
   }
 }
 
-/* When fact box is used inside the top row next to the weather widget */
+
 .top-row .fact-container {
   width: auto;
   margin-top: 0;

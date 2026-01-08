@@ -80,7 +80,7 @@ function RoutesList() {
     }
   };
 
-  // 👥 Add client
+
   const handleAddClient = async (routeId) => {
     const token = localStorage.getItem("token");
     try {
@@ -106,7 +106,7 @@ function RoutesList() {
     }
   };
 
-  // ❌ Delete client
+
   const handleDeleteClient = async (routeId, clientId) => {
     const token = localStorage.getItem("token");
     try {
@@ -172,7 +172,6 @@ function RoutesList() {
                 <p>Kurjeru skaits: {r.parameters.couriers}</p>
                 <p>Attālums: {r.parameters.distance || "nav norādīts"} km</p>
 
-                {/* 👥 Client list */}
                 <h4 style={{ marginTop: "10px" }}>Klienti:</h4>
                 {r.clients.length === 0 && <p style={styles.noData}>Nav klientu</p>}
                 {r.clients.map((c) => (
@@ -189,7 +188,7 @@ function RoutesList() {
                   </div>
                 ))}
 
-                {/* 👥 Add new client form */}
+                
                 <div style={styles.clientForm}>
                   <input
                     style={styles.input}
@@ -222,10 +221,10 @@ function RoutesList() {
                     ➕ Pievienot klientu
                   </button>
                 </div>
-                      {/* 📏 Distance matrix upload */}
+                      
 <h4 style={{ marginTop: "15px" }}>Attālumu matrica:</h4>
 
-{/* Preview of existing matrix (read-only) */}
+
 <textarea
   style={styles.textarea}
   placeholder="Nav saglabātas matricas"
@@ -237,7 +236,7 @@ function RoutesList() {
   readOnly
 ></textarea>
 
-{/* Upload new matrix */}
+
 <div style={{ marginTop: "8px" }}>
   <textarea
     style={styles.textarea}

@@ -1,4 +1,4 @@
-// src/pages/AboutUs.js
+
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import "./Dashboard.css";
@@ -15,7 +15,6 @@ function AboutUs() {
 
   return (
     <div className="dashboard-page">
-      {/* TOP NAV */}
       <header className="dashboard-nav">
         <div className="nav-left">
           <span className="nav-logo" onClick={() => navigate("/dashboard")}>
@@ -30,7 +29,7 @@ function AboutUs() {
         </div>
       </header>
 
-      {/* MAIN CARD */}
+
       <main className="dashboard-main about-main">
         <div className="dashboard-card about-card">
           <div className="dashboard-header">

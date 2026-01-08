@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import "./Login.css";
-import heroIllustration from "../assets/quickroute-hero.png"; // adjust path if needed
+import heroIllustration from "../assets/quickroute-hero.png"; 
 
 function Login() {
   const [email, setEmail] = useState("");
@@ -33,14 +33,14 @@ function Login() {
       }
 
       const data = await response.json();
-      console.log("Login response:", data); // 👈 see exactly what backend returns
+      console.log("Login response:", data); 
 
       const token = data.access_token || data.token;
       if (token) {
         localStorage.setItem("token", token);
       }
 
-      // store user name if backend sent it
+
       if (data.name) {
         localStorage.setItem("userName", data.name);
       }
@@ -54,15 +54,12 @@ function Login() {
 
   return (
     <div className="login-page">
-      {/* TOP CENTERED HEADER */}
       <div className="login-header">
         <h1 className="brand-name">QuickRoute</h1>
         <p className="brand-tagline">Optimize delivery routes</p>
       </div>
 
-      {/* CENTERED CONTENT WRAPPER */}
       <div className="login-container">
-        {/* LEFT SIDE – ILLUSTRATION */}
         <div className="login-left">
           <div className="login-illustration-wrapper">
             <img
@@ -73,7 +70,6 @@ function Login() {
           </div>
         </div>
 
-        {/* RIGHT SIDE – LOGIN CARD */}
         <div className="login-right">
           <div className="login-card">
             <h2 className="login-title">Login</h2>

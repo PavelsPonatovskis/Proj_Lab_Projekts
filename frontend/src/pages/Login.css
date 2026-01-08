@@ -1,25 +1,25 @@
-/* FULL-SCREEN BACKGROUND + CENTERING */
+
 html, body {
   margin: 0;
   padding: 0;
-  overflow: hidden;   /* disables all scrolling */
+  overflow: hidden;   
   height: 100%;
 }
 
 .login-page {
   width: 100%;
-  height: 100vh;      /* ensures no vertical overflow */
+  height: 100vh;      
   margin: 0;
   padding: 3rem 0;
   background: radial-gradient(circle at top left, #064e3b 0, #022c22 40%, #020617 100%);
   color: #f9fafb;
   display: flex;
-  flex-direction: column;   /* allow header + container vertically */
+  flex-direction: column;   
   align-items: center;
-  overflow: hidden;         /* prevents internal scroll */
+  overflow: hidden;         
 }
 
-/* TOP CENTERED HEADER */
+
 .login-header {
   width: 100%;
   text-align: center;
@@ -38,19 +38,19 @@ html, body {
   color: #d1fae5;
 }
 
-/* CENTERED CONTENT WRAPPER (row containing image + login card) */
+
 .login-container {
   width: 100%;
   max-width: 1300px;
   margin: 0 auto;
   display: flex;
   justify-content: center;
-  align-items: center;   /* ensures both are aligned horizontally */
+  align-items: center;  
   gap: 4rem;
   padding: 0 2rem;
 }
 
-/* LEFT SIDE — Illustration only */
+
 .login-left {
   flex: 1;
   display: flex;
@@ -67,7 +67,7 @@ html, body {
   border-radius: 1.5rem;
 }
 
-/* RIGHT SIDE — Login Card */
+
 .login-right {
   flex: 1;
   display: flex;
@@ -92,7 +92,6 @@ html, body {
   margin-bottom: 1.8rem;
 }
 
-/* FORM ELEMENTS */
 .form-group {
   margin-bottom: 1.2rem;
 }
@@ -113,7 +112,7 @@ html, body {
   outline: none;
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
 
-  /* FIX: ensure equal width with button */
+
   box-sizing: border-box;
   display: block;
 }
@@ -136,7 +135,7 @@ html, body {
   cursor: pointer;
   transition: background 0.15s ease, transform 0.05s ease;
 
-  /* FIX: perfect width alignment */
+
   box-sizing: border-box;
   display: block;
 }
@@ -156,7 +155,7 @@ html, body {
   color: #b91c1c;
 }
 
-/* REGISTER TEXT */
+
 .register-text {
   margin-top: 1.5rem;
   font-size: 0.9rem;
@@ -174,7 +173,7 @@ html, body {
   text-decoration: underline;
 }
 
-/* RESPONSIVE */
+
 @media (max-width: 960px) {
   .login-container {
     flex-direction: column;

@@ -1,5 +1,5 @@
 from app import create_app, db
-from app.models import User  # ensure the User model is imported so SQLAlchemy knows it
+from app.models import User 
 
 app = create_app()
 

@@ -20,7 +20,6 @@ def create_app():
     db.init_app(app)
     jwt.init_app(app)
 
-    # ✅ CORS correctly enabled
     CORS(
         app,
         resources={r"/api/*": {"origins": ["http://localhost:3000", "http://127.0.0.1:3000"]}},

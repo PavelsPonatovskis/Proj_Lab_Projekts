@@ -9,7 +9,6 @@ import markerIcon from "leaflet/dist/images/marker-icon.png";
 import markerShadow from "leaflet/dist/images/marker-shadow.png";
 import { fetchWarehouses } from "../api/warehousesApi";
 
-// Fix Leaflet default icon paths (blue markers)
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: markerIcon2x,
@@ -17,7 +16,6 @@ L.Icon.Default.mergeOptions({
   shadowUrl: markerShadow,
 });
 
-/** ✅ Red marker icon for warehouses */
 const warehouseIcon = new L.Icon({
   iconUrl:
     "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png",
@@ -28,7 +26,6 @@ const warehouseIcon = new L.Icon({
   shadowSize: [41, 41],
 });
 
-/** Handles clicking on map: sets coords for the currently active stop */
 function MapClickHandler({ activeStopId, setStops }) {
   useMapEvents({
     click(e) {
@@ -57,13 +54,11 @@ function AddRoute() {
   const [warehouses, setWarehouses] = useState([]);
   const [whError, setWhError] = useState("");
 
-  // ✅ pick warehouse #1 (or first) as the “fixed” warehouse for now
   const selectedWarehouse = useMemo(() => {
     if (!warehouses || warehouses.length === 0) return null;
     return warehouses.find((w) => w.id === 1) || warehouses[0];
   }, [warehouses]);
 
-  // ✅ load warehouses once
   useEffect(() => {
     let alive = true;
 
@@ -147,7 +142,6 @@ function AddRoute() {
     }
 
     try {
-      // 1) Create route + store chosen warehouse in parameters
       const createResp = await fetch("http://127.0.0.1:5000/api/routes/", {
         method: "POST",
         headers: {
@@ -186,7 +180,6 @@ function AddRoute() {
         }
       }
 
-      // Fallback: fetch list, pick newest with this name
       if (!routeId) {
         const listResp = await fetch("http://127.0.0.1:5000/api/routes/", {
           headers: { Authorization: `Bearer ${token}` },
@@ -208,7 +201,6 @@ function AddRoute() {
         return;
       }
 
-      // 2) Add stops as clients
       for (let i = 0; i < cleanedStops.length; i++) {
         const stop = cleanedStops[i];
 
@@ -247,14 +239,12 @@ function AddRoute() {
     }
   };
 
-  // ✅ Map center: warehouse if loaded, otherwise fallback to Riga-ish
   const mapCenter = selectedWarehouse
     ? [selectedWarehouse.lat, selectedWarehouse.lng]
     : [56.9496, 24.1052];
 
   return (
     <div className="dashboard-page">
-      {/* TOP NAV */}
       <header className="dashboard-nav">
         <div className="nav-left">
           <span className="nav-logo" onClick={() => navigate("/dashboard")}>
@@ -269,7 +259,6 @@ function AddRoute() {
         </div>
       </header>
 
-      {/* MAIN CONTENT */}
       <main className="dashboard-main">
         <div className="dashboard-card add-route-card">
           <div className="dashboard-header">
@@ -281,7 +270,6 @@ function AddRoute() {
           </p>
 
           <div className="add-route-layout">
-            {/* LEFT SIDE – FORM */}
             <form className="add-route-form" onSubmit={handleSubmit}>
               <div className="form-group">
                 <label>Route name</label>
@@ -369,7 +357,6 @@ function AddRoute() {
               </button>
             </form>
 
-            {/* RIGHT SIDE – MAP */}
             <div className="add-route-map-wrapper">
               <h2 className="map-title">Map</h2>
               <p className="map-help">
@@ -395,7 +382,6 @@ function AddRoute() {
 
                 <MapClickHandler activeStopId={activeStopId} setStops={setStops} />
 
-                {/* ✅ ALL warehouses markers */}
                 {warehouses.map((w) => (
                   <Marker key={w.id} position={[w.lat, w.lng]} icon={warehouseIcon}>
                     <Tooltip direction="top" offset={[0, -10]} permanent={false}>
@@ -404,7 +390,6 @@ function AddRoute() {
                   </Marker>
                 ))}
 
-                {/* ✅ Stop markers */}
                 {stops
                   .filter((s) => s.lat && s.lng && !isNaN(Number(s.lat)) && !isNaN(Number(s.lng)))
                   .map((s) => (

@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import "./Dashboard.css";
 import WeatherWidget from "../components/WeatherWidget";
 
-// Small list of rotating facts
+
 const FACTS = [
   "Optimized routes can reduce delivery distance by up to 20–30%.",
   "Clustering deliveries in the same area often saves more time than using the absolute shortest path.",
@@ -35,7 +35,6 @@ function Dashboard() {
 
   return (
     <div className="dashboard-page">
-      {/* TOP NAV */}
       <header className="dashboard-nav">
         <div className="nav-left">
           <span className="nav-logo">QuickRoute</span>
@@ -48,8 +47,6 @@ function Dashboard() {
         </div>
       </header>
 
-      {/* FACT BOX ABOVE THE CARD */}
-{/* FACT BOX */}
 <div className="fact-container">
   <div className="fact-box">
     <span className="fact-label">Interesting Fact</span>
@@ -57,14 +54,14 @@ function Dashboard() {
   </div>
 </div>
 
-{/* WEATHER WIDGET */}
+
 <div className="weather-row">
   <WeatherWidget />
 </div>
 
 
 
-      {/* MAIN WHITE CARD */}
+
       <main className="dashboard-main">
         <div className="dashboard-card">
           <div className="dashboard-header">

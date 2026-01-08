@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import "./Register.css";
-import heroIllustration from "../assets/quickroute-hero.png"; // same image as login
+import heroIllustration from "../assets/quickroute-hero.png"; 
 
 function Register() {
   const [name, setName] = useState("");
@@ -42,9 +42,7 @@ function Register() {
       const data = await response.json();
       setInfo("Account created successfully. Redirecting to login...");
 
-      // if you want, you can also store name here, but usually
-      // we redirect and let login handle storing name
-      setTimeout(() => navigate("/"), 1200); // adjust if your login route is different
+      setTimeout(() => navigate("/"), 1200); 
     } catch (err) {
       console.error(err);
       setError("⚠️ Server connection error");
@@ -53,15 +51,12 @@ function Register() {
 
   return (
     <div className="register-page">
-      {/* TOP CENTERED HEADER */}
       <div className="register-header">
         <h1 className="brand-name">QuickRoute</h1>
         <p className="brand-tagline">Pievienojieties un pārvaldiet piegādes</p>
       </div>
 
-      {/* MAIN CONTENT: FORM LEFT, ILLUSTRATION RIGHT */}
       <div className="register-container">
-        {/* LEFT – REGISTER CARD */}
         <div className="register-left">
           <div className="register-card">
             <h2 className="register-title">Register</h2>
@@ -117,7 +112,6 @@ function Register() {
           </div>
         </div>
 
-        {/* RIGHT – ILLUSTRATION */}
         <div className="register-right">
           <div className="register-illustration-wrapper">
             <img
