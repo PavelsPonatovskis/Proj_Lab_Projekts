@@ -9,23 +9,41 @@ from datetime import timedelta
 db = SQLAlchemy()
 jwt = JWTManager()
 
+
 def create_app():
     load_dotenv()
 
     app = Flask(__name__)
-    app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_URL", "sqlite:///app.db")
-    app.config["JWT_SECRET_KEY"] = os.getenv("JWT_SECRET_KEY", "dev-key")
+
+    app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv(
+        "DATABASE_URL", "sqlite:///app.db"
+    )
+    app.config["JWT_SECRET_KEY"] = os.getenv(
+        "JWT_SECRET_KEY", "dev-key"
+    )
     app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(hours=8)
 
     db.init_app(app)
     jwt.init_app(app)
 
+    # --- CORS configuration ---
+    frontend_url = os.getenv("FRONTEND_URL")
+
+    allowed_origins = [
+        "http://localhost:3000",
+        "http://127.0.0.1:3000",
+    ]
+
+    if frontend_url:
+        allowed_origins.append(frontend_url)
+
     CORS(
         app,
-        resources={r"/api/*": {"origins": ["http://localhost:3000", "http://127.0.0.1:3000"]}},
+        resources={r"/api/*": {"origins": allowed_origins}},
         supports_credentials=True,
-        allow_headers=["Content-Type", "Authorization"]
+        allow_headers=["Content-Type", "Authorization"],
     )
+    # --- end CORS configuration ---
 
     from app.auth import auth_bp
     from app.routes_api import routes_bp
