@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import "./Register.css";
-import heroIllustration from "../assets/quickroute-hero.png"; 
+import heroIllustration from "../assets/quickroute-hero.png";
 
 function Register() {
   const [name, setName] = useState("");
@@ -10,6 +10,10 @@ function Register() {
   const [error, setError] = useState("");
   const [info, setInfo] = useState("");
   const navigate = useNavigate();
+
+  // ✅ API base URL (Render or local fallback)
+  const API_BASE =
+    process.env.REACT_APP_API_BASE_URL || "http://127.0.0.1:5000";
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -22,16 +26,13 @@ function Register() {
     }
 
     try {
-      const response = await fetch(
-        "http://127.0.0.1:5000/api/auth/register",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ name, email, password }),
-        }
-      );
+      const response = await fetch(`${API_BASE}/api/auth/register`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ name, email, password }),
+      });
 
       if (!response.ok) {
         const data = await response.json().catch(() => ({}));
@@ -39,10 +40,10 @@ function Register() {
         return;
       }
 
-      const data = await response.json();
+      await response.json();
       setInfo("Account created successfully. Redirecting to login...");
 
-      setTimeout(() => navigate("/"), 1200); 
+      setTimeout(() => navigate("/"), 1200);
     } catch (err) {
       console.error(err);
       setError("⚠️ Server connection error");
