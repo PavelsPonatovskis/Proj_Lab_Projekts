@@ -1,22 +1,13 @@
-
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { buildRoadRoute } from "../utils/osrm";
 import { useNavigate } from "react-router-dom";
 import "./Dashboard.css";
 import "./Routes.css";
-import {
-  MapContainer,
-  TileLayer,
-  Polyline,
-  Marker,
-  Tooltip,
-  useMap,
-} from "react-leaflet";
+import { MapContainer, TileLayer, Polyline, Marker, Tooltip, useMap } from "react-leaflet";
 import L from "leaflet";
 import markerIcon2x from "leaflet/dist/images/marker-icon-2x.png";
 import markerIcon from "leaflet/dist/images/marker-icon.png";
 import markerShadow from "leaflet/dist/images/marker-shadow.png";
-
 
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -25,13 +16,29 @@ L.Icon.Default.mergeOptions({
   shadowUrl: markerShadow,
 });
 
+const RAW_API_BASE = (process.env.REACT_APP_API_BASE_URL || "").trim();
+const API_BASE = RAW_API_BASE.replace(/\/$/, "");
+
+function apiUrl(path) {
+  if (!path.startsWith("/")) path = `/${path}`;
+
+  if (API_BASE) return `${API_BASE}${path}`;
+
+  if (typeof window !== "undefined") {
+    const host = window.location.hostname;
+    if (host === "localhost" || host === "127.0.0.1") {
+      return `http://127.0.0.1:5000${path}`;
+    }
+  }
+
+  return path;
+}
 
 const WAREHOUSES = [
   { id: 1, name: "Warehouse 1", lat: 56.969109, lng: 24.112366 },
   { id: 2, name: "Warehouse 2", lat: 56.939166, lng: 24.055983 },
   { id: 3, name: "Warehouse 3", lat: 56.952044, lng: 24.158705 },
 ];
-
 
 const warehouseIcon = new L.Icon({
   iconUrl:
@@ -43,7 +50,6 @@ const warehouseIcon = new L.Icon({
   shadowSize: [41, 41],
 });
 
-
 function makeNumberedStopIcon(num, variant = "optimized") {
   const extraClass = variant === "baseline" ? "stop-number-badge--baseline" : "";
   return L.divIcon({
@@ -53,7 +59,6 @@ function makeNumberedStopIcon(num, variant = "optimized") {
     iconAnchor: [14, 14],
   });
 }
-
 
 function offsetLatLng(lat, lng, dx = 0, dy = 0) {
   return [lat + dy, lng + dx];
@@ -76,7 +81,6 @@ const pct = (base, val) => {
   return ((base - val) / base) * 100;
 };
 
-
 function toNum(v) {
   const n = Number(v);
   return Number.isFinite(n) ? n : null;
@@ -93,7 +97,6 @@ function getWarehouseById(id) {
   return WAREHOUSES.find((w) => w.id === id) || WAREHOUSES[0];
 }
 
-
 function getTrafficSeconds(section) {
   const t = section?.traffic;
   if (!t || t.error) return null;
@@ -101,11 +104,9 @@ function getTrafficSeconds(section) {
   return Number.isFinite(s) && s > 0 ? s : null;
 }
 
-
 function bestTimeSeconds(section) {
   return getTrafficSeconds(section) ?? section?.duration ?? null;
 }
-
 
 function buildBaselineStops(route) {
   const wh = WAREHOUSES[0];
@@ -114,7 +115,6 @@ function buildBaselineStops(route) {
     ...(route.clients || []),
   ];
 }
-
 
 function buildOptimizedStops(route) {
   const opt = route.optimized;
@@ -129,7 +129,6 @@ function buildOptimizedStops(route) {
     ...orderedClients,
   ];
 }
-
 
 function FitToRoute({ baselineLatLngs, optimizedLatLngs }) {
   const map = useMap();
@@ -164,7 +163,6 @@ function Routes() {
 
   useEffect(() => {
     fetchRoutes();
-
   }, []);
 
   const handleLogout = () => {
@@ -173,21 +171,20 @@ function Routes() {
     navigate("/");
   };
 
-  const authedFetch = (url, options = {}) => {
+  const authedFetch = (pathOrUrl, options = {}) => {
     const token = localStorage.getItem("token");
+    const url = pathOrUrl.startsWith("http") ? pathOrUrl : apiUrl(pathOrUrl);
     return fetch(url, {
       ...options,
       headers: {
         ...(options.headers || {}),
-        Authorization: `Bearer ${token}`,
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
       },
     });
   };
 
   const computeBaseline = async (routeId) => {
-    const res = await authedFetch(`http://127.0.0.1:5000/api/routes/${routeId}/baseline`, {
-      method: "POST",
-    });
+    const res = await authedFetch(`/api/routes/${routeId}/baseline`, { method: "POST" });
     if (!res.ok) {
       const txt = await res.text().catch(() => "");
       throw new Error(`baseline failed (${res.status}) ${txt}`);
@@ -197,9 +194,7 @@ function Routes() {
   };
 
   const optimizeRoute = async (routeId) => {
-    const res = await authedFetch(`http://127.0.0.1:5000/api/routes/${routeId}/optimize`, {
-      method: "POST",
-    });
+    const res = await authedFetch(`/api/routes/${routeId}/optimize`, { method: "POST" });
     if (!res.ok) {
       const txt = await res.text().catch(() => "");
       throw new Error(`optimize failed (${res.status}) ${txt}`);
@@ -213,10 +208,11 @@ function Routes() {
       setLoading(true);
       setError("");
 
-      const res = await authedFetch("http://127.0.0.1:5000/api/routes/");
-      if (!res.ok) throw new Error("Failed to fetch routes");
-      const data = await res.json();
+      const res = await authedFetch("/api/routes/");
+      const txt = await res.text().catch(() => "");
+      if (!res.ok) throw new Error(txt || "Failed to fetch routes");
 
+      const data = txt ? JSON.parse(txt) : {};
       const processed = (data.items || []).map((r, index) => {
         const clients = (r.clients || []).map(normalizeClientStop).filter(Boolean);
         return {
@@ -240,7 +236,6 @@ function Routes() {
       setRouteGeometries({});
       setRoutingLoading({});
 
-
       const missingBaseline = processed.filter((r) => !r.baseline);
       for (const r of missingBaseline) {
         if (baselineInFlightRef.current.has(r.id)) continue;
@@ -252,14 +247,11 @@ function Routes() {
               x.id === r.id ? { ...x, baseline: updated?.baseline ?? x.baseline } : x
             )
           );
-        } catch (e) {
-          console.warn("Baseline compute failed for route:", r.id, e);
-        } finally {
+        } catch {} finally {
           baselineInFlightRef.current.delete(r.id);
         }
       }
     } catch (e) {
-      console.error(e);
       setError("❌ Failed to fetch routes.");
     } finally {
       setLoading(false);
@@ -271,9 +263,7 @@ function Routes() {
     if (!ok) return;
 
     try {
-      const res = await authedFetch(`http://127.0.0.1:5000/api/routes/${routeId}`, {
-        method: "DELETE",
-      });
+      const res = await authedFetch(`/api/routes/${routeId}`, { method: "DELETE" });
       if (!res.ok) {
         const txt = await res.text().catch(() => "");
         throw new Error(`Delete failed (${res.status}) ${txt}`);
@@ -302,8 +292,7 @@ function Routes() {
         setFocusedRouteId((cur) => (cur === routeId ? nextRoutes[0]?.id ?? null : cur));
         return nextRoutes;
       });
-    } catch (e) {
-      console.error(e);
+    } catch {
       alert("Failed to delete the route on the server.");
     }
   };
@@ -328,7 +317,6 @@ function Routes() {
     () => routes.find((r) => r.id === focusedRouteId) || null,
     [routes, focusedRouteId]
   );
-
 
   useEffect(() => {
     if (loading || error) return;
@@ -385,8 +373,7 @@ function Routes() {
           ...prev,
           [routeId]: { baseline: baselineGeo, optimized: optimizedGeo },
         }));
-      } catch (e) {
-        console.error("OSRM geometry build failed:", routeId, e);
+      } catch {
         const baselineStops = buildBaselineStops(route);
         const baselineFallback = baselineStops.map((s) => [s.lat, s.lng]);
 
@@ -443,7 +430,6 @@ function Routes() {
     });
   };
 
-
   const handleOptimize = async (routeId) => {
     if (optimizeInFlightRef.current.has(routeId)) return;
     optimizeInFlightRef.current.add(routeId);
@@ -462,8 +448,7 @@ function Routes() {
         delete copy[routeId];
         return copy;
       });
-    } catch (e) {
-      console.error(e);
+    } catch {
       alert("Optimization failed. Check backend terminal for details.");
     } finally {
       optimizeInFlightRef.current.delete(routeId);
@@ -476,8 +461,8 @@ function Routes() {
   const focusedBaselineLatLngs = focusedGeo?.baseline?.latlngs || null;
   const focusedOptimizedLatLngs = focusedGeo?.optimized?.latlngs || null;
 
-  const BASELINE_OFF = { dx: -0.00018, dy: -0.00010 }; 
-  const OPTIMIZED_OFF = { dx: +0.00018, dy: +0.00010 }; 
+  const BASELINE_OFF = { dx: -0.00018, dy: -0.0001 };
+  const OPTIMIZED_OFF = { dx: 0.00018, dy: 0.0001 };
 
   return (
     <div className="dashboard-page">
@@ -497,10 +482,7 @@ function Routes() {
 
       <main className="dashboard-main">
         <div className="dashboard-card routes-card">
-          <div
-            className="dashboard-header"
-            style={{ display: "flex", alignItems: "center", gap: 12 }}
-          >
+          <div className="dashboard-header" style={{ display: "flex", alignItems: "center", gap: 12 }}>
             <span className="dashboard-emoji">🗺️</span>
             <h1 className="dashboard-title" style={{ margin: 0 }}>
               My routes
@@ -508,8 +490,8 @@ function Routes() {
           </div>
 
           <p className="dashboard-subtitle">
-            Baseline (dashed) vs Optimized (solid). Warehouses are shown in red. Route is
-            open (no return to warehouse).
+            Baseline (dashed) vs Optimized (solid). Warehouses are shown in red. Route is open (no
+            return to warehouse).
           </p>
 
           {loading && <p>⏳ Loading routes...</p>}
@@ -674,6 +656,24 @@ function Routes() {
                   <b>Grey numbers</b> = baseline order • <b>Green numbers</b> = optimized order (offset + always on top)
                 </p>
 
+                <div style={{ display: "flex", justifyContent: "center", marginBottom: 10 }}>
+                  <button
+                    type="button"
+                    onClick={fixStuckRoutes}
+                    style={{
+                      border: "none",
+                      background: "#111827",
+                      color: "white",
+                      fontWeight: 800,
+                      cursor: "pointer",
+                      padding: "8px 12px",
+                      borderRadius: 10,
+                    }}
+                  >
+                    Refresh map
+                  </button>
+                </div>
+
                 <MapContainer center={defaultCenter} zoom={12} scrollWheelZoom={true} className="routes-map">
                   <TileLayer
                     attribution="&copy; OpenStreetMap contributors"
@@ -729,11 +729,8 @@ function Routes() {
                         {isFocused &&
                           (() => {
                             const clients = route.clients || [];
-
-                            
                             const baselineNumbers = clients.map((c, idx) => ({ client: c, n: idx + 1 }));
 
-                           
                             const order = route.optimized?.order || [];
                             const byId = new Map(clients.map((c) => [c.id, c]));
                             const optimizedNumbers = order
@@ -748,7 +745,6 @@ function Routes() {
 
                             return (
                               <>
-                                
                                 {baselineNumbers.map(({ client, n }) => (
                                   <Marker
                                     key={`${route.id}-baseline-num-${client.id ?? n}`}
@@ -763,7 +759,6 @@ function Routes() {
                                   />
                                 ))}
 
-                                
                                 {optimizedNumbers.map(({ client, n }) => (
                                   <Marker
                                     key={`${route.id}-opt-num-${client.id ?? n}`}
