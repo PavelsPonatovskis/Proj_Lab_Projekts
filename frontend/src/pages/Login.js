@@ -1,13 +1,17 @@
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import "./Login.css";
-import heroIllustration from "../assets/quickroute-hero.png"; 
+import heroIllustration from "../assets/quickroute-hero.png";
 
 function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const navigate = useNavigate();
+
+  // ✅ API base URL (Render or local fallback)
+  const API_BASE =
+    process.env.REACT_APP_API_BASE_URL || "http://127.0.0.1:5000";
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -19,7 +23,7 @@ function Login() {
     }
 
     try {
-      const response = await fetch("http://127.0.0.1:5000/api/auth/login", {
+      const response = await fetch(`${API_BASE}/api/auth/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -33,13 +37,12 @@ function Login() {
       }
 
       const data = await response.json();
-      console.log("Login response:", data); 
+      console.log("Login response:", data);
 
       const token = data.access_token || data.token;
       if (token) {
         localStorage.setItem("token", token);
       }
-
 
       if (data.name) {
         localStorage.setItem("userName", data.name);
