@@ -97,3 +97,11 @@ User ..> "Auth (JWT)" : logs in
 | Kartes un maršruti | OpenStreetMap, OSRM | Maršrutu aprēķinam un ģeogrāfisko datu attēlošanai, izmantojot atvērtā koda kartogrāfisko datu avotu. | 
 | Datu vizualizācija | Chart.js | Grafiku un diagrammu veidošanai – ļauj attēlot maršrutu statistiku, piegādes laikus un citu analītisku informāciju lietotāja saskarnē. |
 | Servera izvietošana | Render.com | Timekļa lietotnes izvietošanai mākoņvidē. | 
+
+## Plākāta gala versija
+<img width="945" height="714" alt="plakats" src="https://github.com/user-attachments/assets/6beb1882-c1b8-4e08-b56d-73d5b75da19d" />
+
+## Mājaslapa ir izvietota uz hostinga servera:
+
+https://proj-lab-projekts-2.onrender.com/
+
